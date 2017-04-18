@@ -1,0 +1,16 @@
+
+[[dependencies]]
+  branch = "master"
+  name = "github.com/BurntSushi/toml"
+
+[[dependencies]]
+  name = "github.com/pkg/errors"
+  revision = "v0.8.0"
+
+[[dependencies]]
+  name = "github.com/spf13/cobra"
+  revision = "b6cb3958937245a12d4d7728be080a6c758f4136"
+
+[[dependencies]]
+  branch = "master"
+  name = "gopkg.in/src-d/go-git.v4/..."
