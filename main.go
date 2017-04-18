@@ -1,8 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/stormcat24/protodep/cmd"
 
 func main() {
-
-	fmt.Println("vim-go")
+	cmd.Execute()
 }
