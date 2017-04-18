@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -17,6 +18,9 @@ var depCmd = &cobra.Command{
 		}
 		fmt.Println("dep!!")
 		fmt.Printf("isUpdate=%v\n", isUpdate)
+
+		p, _ := os.Getwd()
+		fmt.Println(p)
 		return nil
 	},
 }
