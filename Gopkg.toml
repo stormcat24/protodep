@@ -14,3 +14,7 @@
 [[dependencies]]
   branch = "master"
   name = "gopkg.in/src-d/go-git.v4/..."
+
+[[dependencies]]
+  name = "github.com/stretchr/testify"
+  branch = "master"

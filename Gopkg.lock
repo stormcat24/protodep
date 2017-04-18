@@ -1,4 +1,16 @@
-memo = "99cc00f23357830b59ebb9ec29b29c173690226255d1a3c65e25c3a443f938e0"
+memo = "0a1679f2c15cb40aa58d7b3b454921b4a63f8ae5e2f3c5c5504bff8cd03f3958"
+
+[[projects]]
+  name = "github.com/BurntSushi/toml"
+  packages = ["."]
+  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "346938d642f2ec3594ed81d874461961cd0faa76"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/fsnotify/fsnotify"
@@ -43,6 +55,17 @@ memo = "99cc00f23357830b59ebb9ec29b29c173690226255d1a3c65e25c3a443f938e0"
   version = "v0.5.0"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "v0.8.0"
+
+[[projects]]
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/spf13/afero"
   packages = [".","mem"]
@@ -76,6 +99,12 @@ memo = "99cc00f23357830b59ebb9ec29b29c173690226255d1a3c65e25c3a443f938e0"
   name = "github.com/spf13/viper"
   packages = ["."]
   revision = "0967fc9aceab2ce9da34061253ac10fb99bba5b2"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/stretchr/testify"
+  packages = ["assert","require"]
+  revision = "4d4bfba8f1d1027c4fdbe371823030df51419987"
 
 [[projects]]
   branch = "master"
