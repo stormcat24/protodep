@@ -7,6 +7,7 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"path/filepath"
+	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
 type GitRepository interface {
@@ -28,18 +29,47 @@ func NewGitRepository(protodepDir string, dep dependency.ProtoDepDependency) Git
 
 func (r *GitHubRepository) Open() (*git.Repository, error) {
 
+	branch := r.dep.Branch
+	revision := r.dep.Revision
+
 	reponame := r.dep.Repository()
 	repopath := filepath.Join(r.protodepDir, ".protodep/src", reponame)
 
+	var rep *git.Repository
+
 	if stat, err := os.Stat(repopath); err == nil && stat.IsDir() {
-		rep, err := git.PlainOpen(repopath)
+		rep, err = git.PlainOpen(repopath)
 		if err != nil {
 			return nil, errors.Wrap(err, "open repository is failed")
 		}
-		return rep, nil
+
+		fetchOpts := &git.FetchOptions{
+			//Auth: &gitssh.PublicKeys{
+			//	User:   "git",
+			//	Signer: signer,
+			//},
+			Progress: os.Stdout,
+		}
+
+		if err := rep.Fetch(fetchOpts); err != nil {
+			return nil, errors.Wrap(err, "fetch repository is failed")
+		}
+
+		if revision != "" {
+
+			wt, err := rep.Worktree()
+			if err != nil {
+				return nil, err
+			}
+
+			wt.Checkout()
+		}
+
+
+		//branchRef := plumbing.ReferenceName(fmt.Sprintf("refs/heads/%s", branch))
 
 	} else {
-		rep, err := git.PlainClone(repopath, false, &git.CloneOptions{
+		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
 			URL:      fmt.Sprintf("https://%s.git", reponame),
 			Progress: os.Stdout,
 		})
@@ -47,7 +77,11 @@ func (r *GitHubRepository) Open() (*git.Repository, error) {
 			return nil, errors.Wrap(err, "clone repository is failed")
 		}
 
-		return rep, nil
+		if revision != "" {
+
+		}
+
 	}
 
+	return rep, nil
 }
