@@ -1,4 +1,4 @@
-memo = "11df1debcfaf375ca14939e86da402a6b83b1668284f0ed53da41005b50f798a"
+memo = "03f2df5bc41c2faf50f8eed6b4acc6b1f601cd675290383eef0c1682bc86f70d"
 
 [[projects]]
   name = "github.com/BurntSushi/toml"
@@ -22,7 +22,7 @@ memo = "11df1debcfaf375ca14939e86da402a6b83b1668284f0ed53da41005b50f798a"
   branch = "master"
   name = "github.com/hashicorp/hcl"
   packages = [".","hcl/ast","hcl/parser","hcl/scanner","hcl/strconv","hcl/token","json/parser","json/scanner","json/token"]
-  revision = "630949a3c5fa3c613328e1b8256052cbc2327c9b"
+  revision = "a4b07c25de5ff55ad3b8936cea69a79a3d95a855"
 
 [[projects]]
   branch = "master"
@@ -40,7 +40,7 @@ memo = "11df1debcfaf375ca14939e86da402a6b83b1668284f0ed53da41005b50f798a"
   branch = "master"
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
-  revision = "53818660ed4955e899c0bcafa97299a388bd7c8e"
+  revision = "cc8532a8e9a55ea36402aa21efdf403a60d34096"
 
 [[projects]]
   name = "github.com/pelletier/go-buffruneio"
@@ -98,7 +98,7 @@ memo = "11df1debcfaf375ca14939e86da402a6b83b1668284f0ed53da41005b50f798a"
   branch = "master"
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51"
+  revision = "75859d1ee5f135362c9534f7db667e0150d9f577"
 
 [[projects]]
   branch = "master"
@@ -122,25 +122,25 @@ memo = "11df1debcfaf375ca14939e86da402a6b83b1668284f0ed53da41005b50f798a"
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","ed25519","ed25519/internal/edwards25519","ssh","ssh/agent"]
-  revision = "12c985af8526c1f6f0c463bbfd9d69623d13b323"
+  revision = "5a033cc77e57eca05bdb50522851d29e03569cbe"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "f3918c30c5c2cb527c0b071a27c35120a6c0719a"
+  revision = "9ccfe848b9db8435a24c424abbc07a921adf1df5"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/text"
   packages = ["internal/gen","internal/triegen","internal/ucd","transform","unicode/cldr","unicode/norm"]
-  revision = "f4b4367115ec2de254587813edaa901bc1c723a8"
+  revision = "470f45bf29f4147d6fbd7dfd0a02a848e49f5bf4"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v2"
-  packages = [".","memfs","osfs"]
-  revision = "0f02306b1aa8fe9ed04feb409ceffedc568fa2a4"
-  version = "v2.0.3"
+  packages = [".","osfs"]
+  revision = "99d839800b93542496ec19319f37abacf17f589f"
+  version = "v2.0.4"
 
 [[projects]]
   branch = "v4"
