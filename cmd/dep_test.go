@@ -12,6 +12,7 @@ func TestDep(t *testing.T) {
 	osargs := []string{"cmd"}
 	os.Args = append(osargs, as...)
 
+	unitTest = true
 	err := depCmd.Execute()
 	require.NoError(t, err)
 }
