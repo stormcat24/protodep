@@ -1,3 +1,4 @@
+proto_outdir = "./proto"
 
 [[dependencies]]
   name = "github.com/openfresh/plasma/protobuf"

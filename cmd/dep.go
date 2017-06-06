@@ -66,7 +66,7 @@ var depCmd = &cobra.Command{
 				outdirRoot = pwd
 			}
 
-			outdir := filepath.Join(outdirRoot, dep.Repository())
+			outdir := filepath.Join(outdirRoot, protodep.ProtoOutdir, dep.Repository())
 			fmt.Println(outdir)
 
 			sources := make([]protoResource, 0)
