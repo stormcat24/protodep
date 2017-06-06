@@ -14,7 +14,6 @@ type ProtoDepDependency struct {
 	Branch   string
 }
 
-
 func (d *ProtoDepDependency) Repository() string {
 	tokens := strings.Split(d.Name, "/")
 	if len(tokens) > 3 {
