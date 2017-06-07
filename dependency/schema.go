@@ -10,26 +10,26 @@ type ProtoDep struct {
 }
 
 type ProtoDepDependency struct {
-	Name     string
-	Revision string
-	Branch   string
+	Target   string `toml:"target"`
+	Revision string `toml:"revision"`
+	Branch   string `toml:"branch"`
 }
 
 func (d *ProtoDepDependency) Repository() string {
-	tokens := strings.Split(d.Name, "/")
+	tokens := strings.Split(d.Target, "/")
 	if len(tokens) > 3 {
 		return strings.Join(tokens[0:3], "/")
 	} else {
-		return d.Name
+		return d.Target
 	}
 }
 
 func (d *ProtoDepDependency) Directory() string {
 	r := d.Repository()
 
-	if d.Name == r {
+	if d.Target == r {
 		return "."
 	} else {
-		return "." + strings.Replace(d.Name, r, "", 1)
+		return "." + strings.Replace(d.Target, r, "", 1)
 	}
 }

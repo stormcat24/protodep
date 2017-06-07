@@ -1,23 +1,24 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 
+	"io/ioutil"
+	"path/filepath"
+	"strings"
+
+	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/stormcat24/protodep/dependency"
 	"github.com/stormcat24/protodep/helper"
 	"github.com/stormcat24/protodep/repository"
-	"path/filepath"
-	"github.com/mitchellh/go-homedir"
-	"strings"
-	"io/ioutil"
+	"github.com/stormcat24/protodep/logger"
 )
 
 var unitTest = false
 
 type protoResource struct {
-	source string
+	source       string
 	relativeDest string
 }
 
@@ -30,7 +31,7 @@ var depCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		fmt.Printf("update lock file is %t\n", isUpdate)
+		logger.Info("force update = %t", isUpdate)
 
 		pwd, err := os.Getwd()
 		if err != nil {
@@ -44,17 +45,19 @@ var depCmd = &cobra.Command{
 
 		authProvider := helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", "id_rsa"))
 
-		dep := dependency.NewDependency(pwd)
+		dep := dependency.NewDependency(pwd, isUpdate)
 		protodep, err := dep.Load()
 		if err != nil {
 			return err
 		}
 
+		newdeps := make([]dependency.ProtoDepDependency, 0, len(protodep.Dependencies))
 		protodepDir := filepath.Join(homeDir, ".protodep")
+
 		for _, dep := range protodep.Dependencies {
 			gitrepo := repository.NewGitRepository(protodepDir, dep, authProvider)
 
-			_, err := gitrepo.Open()
+			repo, err := gitrepo.Open()
 			if err != nil {
 				return err
 			}
@@ -67,7 +70,6 @@ var depCmd = &cobra.Command{
 			}
 
 			outdir := filepath.Join(outdirRoot, protodep.ProtoOutdir, dep.Repository())
-			fmt.Println(outdir)
 
 			sources := make([]protoResource, 0)
 
@@ -78,7 +80,7 @@ var depCmd = &cobra.Command{
 				}
 				if strings.HasSuffix(path, ".proto") {
 					sources = append(sources, protoResource{
-						source: path,
+						source:       path,
 						relativeDest: strings.Replace(path, protoRootDir, "", -1),
 					})
 				}
@@ -102,8 +104,22 @@ var depCmd = &cobra.Command{
 				}
 			}
 
-			// TOOD update lock file
+			newdeps = append(newdeps, dependency.ProtoDepDependency{
+				Target:   repo.Dep.Target,
+				Branch:   repo.Dep.Branch,
+				Revision: repo.Hash,
+			})
+		}
 
+		newProtodep := dependency.ProtoDep{
+			ProtoOutdir:  protodep.ProtoOutdir,
+			Dependencies: newdeps,
+		}
+
+		if dep.IsNeedWriteLockFile() {
+			if err := helper.WriteToml("protodep.lock", newProtodep); err != nil {
+				return err
+			}
 		}
 
 		return nil

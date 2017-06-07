@@ -4,6 +4,7 @@ import (
 	gitssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 	"fmt"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
+	"github.com/stormcat24/protodep/logger"
 )
 
 type AuthProvider interface {
@@ -20,10 +21,12 @@ type AuthProviderHTTPS struct {
 
 func NewAuthProvider(pemFile string) AuthProvider {
 	if pemFile != "" {
+		logger.Info("use SSH protocol")
 		return &AuthProviderWithSSH{
 			pemFile: pemFile,
 		}
 	} else {
+		logger.Info("use HTTP/HTTPS protocol")
 		return &AuthProviderHTTPS{}
 	}
 }
