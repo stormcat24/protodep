@@ -1,8 +1,9 @@
+proto_outdir = "./proto"
 
 [[dependencies]]
-  name = "github.com/google/protobuf/examples"
+  target = "github.com/google/protobuf/examples"
   branch = "master"
 
 [[dependencies]]
-  name = "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb"
+  target = "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb"
   revision = "v1.2.2"

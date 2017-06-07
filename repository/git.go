@@ -7,13 +7,13 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/stormcat24/protodep/dependency"
+	"github.com/stormcat24/protodep/helper"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"github.com/stormcat24/protodep/helper"
 )
 
 type GitRepository interface {
-	Open() (*git.Repository, error)
+	Open() (*OpenedRepository, error)
 	ProtoRootDir() string
 }
 
@@ -31,7 +31,13 @@ func NewGitRepository(protodepDir string, dep dependency.ProtoDepDependency, aut
 	}
 }
 
-func (r *GitHubRepository) Open() (*git.Repository, error) {
+type OpenedRepository struct {
+	Repository *git.Repository
+	Dep        dependency.ProtoDepDependency
+	Hash       string
+}
+
+func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 
 	branch := "master"
 	if r.dep.Branch != "" {
@@ -45,6 +51,7 @@ func (r *GitHubRepository) Open() (*git.Repository, error) {
 
 	var rep *git.Repository
 
+	fmt.Println(repopath)
 	if stat, err := os.Stat(repopath); err == nil && stat.IsDir() {
 		rep, err = git.PlainOpen(repopath)
 		if err != nil {
@@ -64,8 +71,8 @@ func (r *GitHubRepository) Open() (*git.Repository, error) {
 
 	} else {
 		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
-			Auth: r.authProvider.AuthMethod(),
-			URL:  r.authProvider.GetRepositoryURL(reponame),
+			Auth:     r.authProvider.AuthMethod(),
+			URL:      r.authProvider.GetRepositoryURL(reponame),
 			Progress: os.Stdout,
 		})
 		if err != nil {
@@ -79,7 +86,7 @@ func (r *GitHubRepository) Open() (*git.Repository, error) {
 		return nil, errors.Wrap(err, "get worktree is failed")
 	}
 
-	if branch != "master" {
+	if revision == "" {
 		target, err := rep.Storer.Reference(plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)))
 		if err != nil {
 			return nil, errors.Wrapf(err, "change branch to %s is failed", branch)
@@ -93,7 +100,7 @@ func (r *GitHubRepository) Open() (*git.Repository, error) {
 		if err := rep.Storer.SetReference(head); err != nil {
 			return nil, errors.Wrapf(err, "set head to %s is failed", branch)
 		}
-	} else if revision != "" {
+	} else  {
 		hash := plumbing.NewHash(revision)
 		if err := wt.Checkout(&git.CheckoutOptions{Hash: hash}); err != nil {
 			return nil, errors.Wrapf(err, "checkout to %s is failed", revision)
@@ -105,10 +112,23 @@ func (r *GitHubRepository) Open() (*git.Repository, error) {
 		}
 	}
 
-	return rep, nil
+	commiter, err := rep.Log(&git.LogOptions{})
+	if err != nil {
+		return nil, errors.Wrap(err, "get commit is failed")
+	}
+
+	current, err := commiter.Next()
+	if err != nil {
+		return nil, errors.Wrap(err, "get commit current is failed")
+	}
+
+	return &OpenedRepository{
+		Repository: rep,
+		Dep: r.dep,
+		Hash: current.Hash.String(),
+	}, nil
 }
 
 func (r *GitHubRepository) ProtoRootDir() string {
-	return filepath.Join(r.protodepDir, r.dep.Name)
+	return filepath.Join(r.protodepDir, r.dep.Target)
 }
-

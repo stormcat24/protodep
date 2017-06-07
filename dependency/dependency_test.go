@@ -19,11 +19,11 @@ func TestLoad(t *testing.T) {
 	withBranch := actual.Dependencies[0]
 	withRevision := actual.Dependencies[1]
 
-	require.Equal(t, "github.com/google/protobuf/examples", withBranch.Name)
+	require.Equal(t, "github.com/google/protobuf/examples", withBranch.Target)
 	require.Equal(t, "master", withBranch.Branch)
 	require.Equal(t, "", withBranch.Revision)
 
-	require.Equal(t, "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb", withRevision.Name)
+	require.Equal(t, "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb", withRevision.Target)
 	require.Equal(t, "", withRevision.Branch)
 	require.Equal(t, "v1.2.2", withRevision.Revision)
 }

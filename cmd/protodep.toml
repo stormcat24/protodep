@@ -1,5 +1,5 @@
 proto_outdir = "./proto"
 
 [[dependencies]]
-  name = "github.com/openfresh/plasma/protobuf"
+  target = "github.com/openfresh/plasma/protobuf"
   branch = "master"
