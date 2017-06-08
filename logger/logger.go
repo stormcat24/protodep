@@ -8,7 +8,7 @@ import (
 )
 
 func Info(format string, a ...interface{}) {
-	color.Red("[INFO] " + format, a...)
+	color.Green("[INFO] " + format, a...)
 }
 
 func Error(format string, a ...interface{}) {
