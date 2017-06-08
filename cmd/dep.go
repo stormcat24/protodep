@@ -87,6 +87,10 @@ var depCmd = &cobra.Command{
 				return nil
 			})
 
+			if err := os.RemoveAll(outdir); err != nil {
+				return err
+			}
+
 			for _, s := range sources {
 				outpath := filepath.Join(outdir, s.relativeDest)
 
