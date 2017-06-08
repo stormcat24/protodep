@@ -1,6 +1,6 @@
 package cmd
 
 func init() {
-	RootCmd.AddCommand(depCmd)
+	RootCmd.AddCommand(upCmd)
 	initDepCmd()
 }

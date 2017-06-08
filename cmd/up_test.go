@@ -6,13 +6,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDep(t *testing.T) {
+func TestUp(t *testing.T) {
 
-	as := []string{"dep"}
+	as := []string{"up"}
 	osargs := []string{"cmd"}
 	os.Args = append(osargs, as...)
 
 	unitTest = true
-	err := depCmd.Execute()
+	err := upCmd.Execute()
 	require.NoError(t, err)
 }
