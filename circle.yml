@@ -1,0 +1,7 @@
+deployment:
+  release:
+    tag: /[0-9]+(\.[0-9]+)*/
+    owner: stormcat24 
+    commands:
+      - make build-all
+      - ./release.sh
