@@ -1,5 +1,5 @@
 proto_outdir = "./proto"
 
 [[dependencies]]
-  target = "github.com/openfresh/plasma/protobuf"
+  target = "ghe.ca-tools.org/VALENCIA/valencia-grpc/proto"
   branch = "master"
