@@ -10,6 +10,7 @@ import (
 	"github.com/stormcat24/protodep/helper"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
+	"github.com/stormcat24/protodep/logger"
 )
 
 type GitRepository interface {
@@ -51,16 +52,17 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 
 	var rep *git.Repository
 
-	fmt.Println(repopath)
 	if stat, err := os.Stat(repopath); err == nil && stat.IsDir() {
+		spinner := logger.InfoWithSpinner("Getting %s ", reponame)
+
 		rep, err = git.PlainOpen(repopath)
 		if err != nil {
 			return nil, errors.Wrap(err, "open repository is failed")
 		}
+		spinner.Stop()
 
 		fetchOpts := &git.FetchOptions{
 			Auth:     r.authProvider.AuthMethod(),
-			Progress: os.Stdout,
 		}
 
 		if err := rep.Fetch(fetchOpts); err != nil {
@@ -68,17 +70,18 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 				return nil, errors.Wrap(err, "fetch repository is failed")
 			}
 		}
+		spinner.Finish()
 
 	} else {
+		spinner := logger.InfoWithSpinner("Getting %s ", reponame)
 		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
 			Auth:     r.authProvider.AuthMethod(),
 			URL:      r.authProvider.GetRepositoryURL(reponame),
-			Progress: os.Stdout,
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "clone repository is failed")
 		}
-
+		spinner.Finish()
 	}
 
 	wt, err := rep.Worktree()

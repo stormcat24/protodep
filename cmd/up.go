@@ -22,16 +22,16 @@ type protoResource struct {
 	relativeDest string
 }
 
-var depCmd = &cobra.Command{
-	Use:   "dep",
-	Short: "get proto dependencies",
+var upCmd = &cobra.Command{
+	Use:   "up",
+	Short: "Populate .proto vendors existing protodep.toml and lock",
 	RunE: func(cmd *cobra.Command, args []string) error {
 
-		isUpdate, err := cmd.Flags().GetBool("update")
+		isForceUpdate, err := cmd.Flags().GetBool("force")
 		if err != nil {
 			return err
 		}
-		logger.Info("force update = %t", isUpdate)
+		logger.Info("force update = %t", isForceUpdate)
 
 		pwd, err := os.Getwd()
 		if err != nil {
@@ -45,7 +45,7 @@ var depCmd = &cobra.Command{
 
 		authProvider := helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", "id_rsa"))
 
-		dep := dependency.NewDependency(pwd, isUpdate)
+		dep := dependency.NewDependency(pwd, isForceUpdate)
 		protodep, err := dep.Load()
 		if err != nil {
 			return err
@@ -127,5 +127,5 @@ var depCmd = &cobra.Command{
 }
 
 func initDepCmd() {
-	depCmd.PersistentFlags().BoolP("update", "u", false, "update locked file and vendors")
+	upCmd.PersistentFlags().BoolP("force", "f", false, "update locked file and .proto vendors")
 }
