@@ -95,11 +95,7 @@ var depCmd = &cobra.Command{
 					return err
 				}
 
-				if err := os.MkdirAll(outdir, 0777); err != nil {
-					return err
-				}
-
-				if err := ioutil.WriteFile(outpath, content, 0644); err != nil {
+				if err := helper.WriteFileWithDirectory(outpath, content, 0644); err != nil {
 					return err
 				}
 			}
