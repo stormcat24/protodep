@@ -28,3 +28,4 @@ bin/
 .idea/
 
 protodep.lock
+artifacts/
