@@ -1,10 +1,11 @@
 package helper
 
 import (
-	gitssh "gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 	"fmt"
-	"gopkg.in/src-d/go-git.v4/plumbing/transport"
+
 	"github.com/stormcat24/protodep/logger"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
 
 type AuthProvider interface {
@@ -40,7 +41,7 @@ func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
 }
 
 func (p *AuthProviderWithSSH) AuthMethod() transport.AuthMethod {
-	am, err := gitssh.NewPublicKeysFromFile("git", p.pemFile, "")
+	am, err := ssh.NewPublicKeysFromFile("git", p.pemFile, "")
 	if err != nil {
 		panic(err)
 	}
