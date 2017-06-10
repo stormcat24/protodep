@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
   revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
 
 [[projects]]
   branch = "master"
@@ -24,6 +24,12 @@
   packages = ["."]
   revision = "570b54cabe6b8eb0bc2dfce68d964677d63b5260"
   version = "v1.5.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/golang/mock"
+  packages = ["gomock"]
+  revision = "bd3c8e81be01eef76d4b503f5e687d2d1354d2d9"
 
 [[projects]]
   branch = "master"
@@ -53,7 +59,7 @@
   branch = "master"
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "ff09b135c25aae272398c51a07235b90a75aa4f0"
+  revision = "c605e284fe17294bda444b34710735b29d1a9d90"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -71,59 +77,59 @@
   branch = "master"
   name = "github.com/spf13/cobra"
   packages = ["."]
-  revision = "b6cb3958937245a12d4d7728be080a6c758f4136"
+  revision = "99ff9334bda26384b5ef4a4aaa4d444d29bdde73"
 
 [[projects]]
   branch = "master"
   name = "github.com/spf13/pflag"
   packages = ["."]
-  revision = "9a906f17374922ed0f74e1b2f593d3723f2ffb00"
+  revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
 
 [[projects]]
-  branch = "v1"
   name = "github.com/src-d/gcfg"
   packages = [".","scanner","token","types"]
   revision = "f187355171c936ac84a82793659ebb4936bc1c23"
+  version = "v1.3.0"
 
 [[projects]]
   branch = "master"
   name = "github.com/stretchr/testify"
   packages = ["assert","require"]
-  revision = "4d4bfba8f1d1027c4fdbe371823030df51419987"
+  revision = "f6abca593680b2315d2075e0f5e2a9751e3f431a"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","ed25519","ed25519/internal/edwards25519","ssh","ssh/agent","ssh/knownhosts"]
-  revision = "e1a4589e7d3ea14a3352255d04b6f1a418845e5e"
+  revision = "e7ba82683099cae71475961448ab8f903ea77c26"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "f3918c30c5c2cb527c0b071a27c35120a6c0719a"
+  revision = "b9e8d468b01f806830d387bd9a1fe96dc68129d1"
 
 [[projects]]
-  branch = "master"
   name = "gopkg.in/src-d/go-billy.v2"
   packages = [".","osfs"]
   revision = "52497601f113730d14baa00453674376fca22f22"
+  version = "v2.0.5"
 
 [[projects]]
-  branch = "v4"
   name = "gopkg.in/src-d/go-git.v4"
   packages = [".","config","internal/revision","plumbing","plumbing/cache","plumbing/filemode","plumbing/format/config","plumbing/format/diff","plumbing/format/idxfile","plumbing/format/index","plumbing/format/objfile","plumbing/format/packfile","plumbing/format/pktline","plumbing/object","plumbing/protocol/packp","plumbing/protocol/packp/capability","plumbing/protocol/packp/sideband","plumbing/revlist","plumbing/storer","plumbing/transport","plumbing/transport/client","plumbing/transport/file","plumbing/transport/git","plumbing/transport/http","plumbing/transport/internal/common","plumbing/transport/server","plumbing/transport/ssh","storage","storage/filesystem","storage/filesystem/internal/dotgit","storage/memory","utils/binary","utils/diff","utils/ioutil","utils/merkletrie","utils/merkletrie/filesystem","utils/merkletrie/index","utils/merkletrie/internal/frame","utils/merkletrie/noder"]
   revision = "7e249dfcf28765939bde8f38784b3274b522f880"
+  version = "v4.0.0-rc10"
 
 [[projects]]
-  branch = "master"
   name = "gopkg.in/warnings.v0"
   packages = ["."]
   revision = "8a331561fe74dadba6edfc59f3be66c22c3b065d"
+  version = "v0.1.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d5276a7f81175a38d06f65cc03d3168598e3063ada19668c92e005f5d4a97be2"
+  inputs-digest = "9a0020b91a4bf29b907bf0c57cea083d4abc9d516530d0cc25b7c59e30f895cf"
   solver-name = "gps-cdcl"
   solver-version = 1

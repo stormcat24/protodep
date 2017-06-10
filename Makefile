@@ -4,7 +4,8 @@ SERIAL_PACKAGES= \
 		 cmd \
 		 dependency \
 		 helper \
-		 repository
+		 repository \
+		 service
 TARGET_SERIAL_PACKAGES=$(addprefix test-,$(SERIAL_PACKAGES))
 
 deps-build:
@@ -40,3 +41,7 @@ test: $(TARGET_SERIAL_PACKAGES)
 
 $(TARGET_SERIAL_PACKAGES): test-%:
 		go test $(BASE_PACKAGE)/$(*)
+
+mock:
+	go get github.com/golang/mock/mockgen
+	mockgen -source helper/auth.go -package helper -destination helper/auth_mock.go

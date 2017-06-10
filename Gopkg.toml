@@ -71,12 +71,24 @@
   name = "github.com/BurntSushi/toml"
 
 [[constraint]]
+  branch = "master"
+  name = "github.com/briandowns/spinner"
+
+[[constraint]]
   name = "github.com/davecgh/go-spew"
   version = "1.1.0"
 
 [[constraint]]
+  name = "github.com/fatih/color"
+  version = "1.5.0"
+
+[[constraint]]
   branch = "master"
   name = "github.com/inconshreveable/mousetrap"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
 
 [[constraint]]
   branch = "master"
@@ -92,16 +104,8 @@
 
 [[constraint]]
   branch = "master"
-  name = "github.com/spf13/viper"
-
-[[constraint]]
-  branch = "master"
   name = "github.com/stretchr/testify"
 
 [[constraint]]
-  branch = "master"
-  name = "golang.org/x/crypto"
-
-[[constraint]]
-  branch = "v4"
+  version = "v4.0.0-rc10"
   name = "gopkg.in/src-d/go-git.v4"

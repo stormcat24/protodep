@@ -8,12 +8,12 @@ import (
 func TestRepository(t *testing.T) {
 
 	matched := ProtoDepDependency{
-		Name: "github.com/google/protobuf",
+		Target: "github.com/google/protobuf",
 	}
 	require.Equal(t, "github.com/google/protobuf", matched.Repository())
 
 	protruded := ProtoDepDependency{
-		Name: "github.com/google/protobuf/examples",
+		Target: "github.com/google/protobuf/examples",
 	}
 	require.Equal(t, "github.com/google/protobuf", protruded.Repository())
 }
@@ -21,12 +21,12 @@ func TestRepository(t *testing.T) {
 func TestDirectory(t *testing.T) {
 
 	matched := ProtoDepDependency{
-		Name: "github.com/google/protobuf",
+		Target: "github.com/google/protobuf",
 	}
 	require.Equal(t, ".", matched.Directory())
 
 	protruded := ProtoDepDependency{
-		Name: "github.com/google/protobuf/examples",
+		Target: "github.com/google/protobuf/examples",
 	}
 
 	require.Equal(t, "./examples", protruded.Directory())
