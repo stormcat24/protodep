@@ -3,12 +3,13 @@ package cmd
 import (
 	"os"
 
+	"path/filepath"
+
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/stormcat24/protodep/helper"
 	"github.com/stormcat24/protodep/logger"
 	"github.com/stormcat24/protodep/service"
-	"path/filepath"
 )
 
 var (
@@ -31,6 +32,12 @@ var upCmd = &cobra.Command{
 		}
 		logger.Info("force update = %t", isForceUpdate)
 
+		identityFile, err := cmd.Flags().GetString("identity-file")
+		if err != nil {
+			return err
+		}
+		logger.Info("identity file = %s", identityFile)
+
 		pwd, err := os.Getwd()
 		if err != nil {
 			return err
@@ -41,7 +48,7 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", "id_rsa"))
+		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile))
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
 		return updateService.Resolve(isForceUpdate)
 	},
@@ -49,4 +56,5 @@ var upCmd = &cobra.Command{
 
 func initDepCmd() {
 	upCmd.PersistentFlags().BoolP("force", "f", false, "update locked file and .proto vendors")
+	upCmd.PersistentFlags().StringP("identity-file", "i", "id_rsa", "set the identity file for SSH")
 }
