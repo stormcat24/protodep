@@ -14,17 +14,19 @@ type AuthProvider interface {
 }
 
 type AuthProviderWithSSH struct {
-	pemFile string
+	pemFile  string
+	password string
 }
 
 type AuthProviderHTTPS struct {
 }
 
-func NewAuthProvider(pemFile string) AuthProvider {
+func NewAuthProvider(pemFile, password string) AuthProvider {
 	if pemFile != "" {
 		logger.Info("use SSH protocol")
 		return &AuthProviderWithSSH{
-			pemFile: pemFile,
+			pemFile:  pemFile,
+			password: password,
 		}
 	} else {
 		logger.Info("use HTTP/HTTPS protocol")
@@ -41,7 +43,7 @@ func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
 }
 
 func (p *AuthProviderWithSSH) AuthMethod() transport.AuthMethod {
-	am, err := ssh.NewPublicKeysFromFile("git", p.pemFile, "")
+	am, err := ssh.NewPublicKeysFromFile("git", p.pemFile, p.password)
 	if err != nil {
 		panic(err)
 	}
