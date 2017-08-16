@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"os"
-
 	"path/filepath"
+	"strings"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -38,6 +38,14 @@ var upCmd = &cobra.Command{
 		}
 		logger.Info("identity file = %s", identityFile)
 
+		password, err := cmd.Flags().GetString("password")
+		if err != nil {
+			return err
+		}
+		if password != "" {
+			logger.Info("password = %s", strings.Repeat("x", len(password))) // Do not display the password.
+		}
+
 		pwd, err := os.Getwd()
 		if err != nil {
 			return err
@@ -48,7 +56,7 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile))
+		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile), password)
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
 		return updateService.Resolve(isForceUpdate)
 	},
@@ -57,4 +65,5 @@ var upCmd = &cobra.Command{
 func initDepCmd() {
 	upCmd.PersistentFlags().BoolP("force", "f", false, "update locked file and .proto vendors")
 	upCmd.PersistentFlags().StringP("identity-file", "i", "id_rsa", "set the identity file for SSH")
+	upCmd.PersistentFlags().StringP("password", "p", "", "set the password for SSH")
 }
