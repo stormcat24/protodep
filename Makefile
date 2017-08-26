@@ -9,7 +9,7 @@ SERIAL_PACKAGES= \
 TARGET_SERIAL_PACKAGES=$(addprefix test-,$(SERIAL_PACKAGES))
 
 deps-build:
-		go get -u github.com/golang/dep/...
+		go get -u github.com/golang/dep/cmd/dep
 		go get github.com/golang/lint/golint
 
 deps: deps-build
