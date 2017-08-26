@@ -2,10 +2,10 @@
 
 
 [[projects]]
-  branch = "master"
   name = "github.com/BurntSushi/toml"
   packages = ["."]
-  revision = "a368813c5e648fee92e5f6c30e3944ff9d5e8895"
+  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
+  version = "v0.3.0"
 
 [[projects]]
   name = "github.com/briandowns/spinner"
@@ -46,8 +46,8 @@
 [[projects]]
   name = "github.com/mattn/go-colorable"
   packages = ["."]
-  revision = "941b50ebc6efddf4c41c8e4537a5f68a4e686b24"
-  version = "v0.0.8"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
 
 [[projects]]
   name = "github.com/mattn/go-isatty"
@@ -62,10 +62,10 @@
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
-  branch = "master"
   name = "github.com/pkg/errors"
   packages = ["."]
-  revision = "c605e284fe17294bda444b34710735b29d1a9d90"
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
 
 [[projects]]
   name = "github.com/pmezard/go-difflib"
@@ -83,7 +83,7 @@
   branch = "master"
   name = "github.com/spf13/cobra"
   packages = ["."]
-  revision = "d7ba19510d17ff09130f842c8c2eb48f4196b6ee"
+  revision = "2df9a531813370438a4d79bfc33e21f58063ed87"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -98,10 +98,10 @@
   version = "v1.3.0"
 
 [[projects]]
-  branch = "master"
   name = "github.com/stretchr/testify"
   packages = ["assert","require"]
-  revision = "05e8a0eda380579888eb53c394909df027f06991"
+  revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
+  version = "v1.1.4"
 
 [[projects]]
   branch = "master"
@@ -113,19 +113,19 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["curve25519","ed25519","ed25519/internal/edwards25519","ssh","ssh/agent","ssh/knownhosts"]
-  revision = "558b6879de74bc843225cde5686419267ff707ca"
+  revision = "81e90905daefcd6fd217b62423c0908922eadb30"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/net"
   packages = ["context"]
-  revision = "f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f"
+  revision = "57efc9c3d9f91fb3277f8da1cff370539c4d3dc5"
 
 [[projects]]
   branch = "master"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  revision = "0f826bdd13b500be0f1d4004938ad978fcc6031e"
+  revision = "2d6f6f883a06fc0d5f4b14a81e4c28705ea64c15"
 
 [[projects]]
   name = "gopkg.in/src-d/go-billy.v3"
@@ -148,6 +148,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "91726d8a70fe02d0acc08b23999f03c72b66aacb81aabcae610f1f1cde9d0dc0"
+  inputs-digest = "633b548a496f031435741c2c83dbdba71525d9a958851f4204a5d5289b3b27a1"
   solver-name = "gps-cdcl"
   solver-version = 1
