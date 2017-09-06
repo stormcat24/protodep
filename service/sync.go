@@ -54,7 +54,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 			return err
 		}
 
-		outdir := filepath.Join(s.outputRootDir, protodep.ProtoOutdir, dep.Repository())
+		outdir := filepath.Join(s.outputRootDir, protodep.ProtoOutdir)
 
 		sources := make([]protoResource, 0)
 
