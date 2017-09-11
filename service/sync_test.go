@@ -1,13 +1,14 @@
 package service
 
 import (
-	"testing"
-	"github.com/golang/mock/gomock"
-	"github.com/stormcat24/protodep/helper"
-	"github.com/mitchellh/go-homedir"
-	"github.com/stretchr/testify/require"
 	"os"
 	"path/filepath"
+	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/mitchellh/go-homedir"
+	"github.com/stormcat24/protodep/helper"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSync(t *testing.T) {
@@ -24,7 +25,9 @@ func TestSync(t *testing.T) {
 
 	authProviderMock := helper.NewMockAuthProvider(c)
 	authProviderMock.EXPECT().AuthMethod().Return(nil).AnyTimes()
-	authProviderMock.EXPECT().GetRepositoryURL(gomock.Any()).Return("https://github.com/openfresh/plasma.git").AnyTimes()
+	authProviderMock.EXPECT().GetRepositoryURL(gomock.Any()).Return("https://github.com/google/protobuf.git").After(
+		authProviderMock.EXPECT().GetRepositoryURL(gomock.Any()).Return("https://github.com/openfresh/plasma.git"),
+	)
 
 	pwd, err := os.Getwd()
 	require.NoError(t, err)
@@ -36,8 +39,19 @@ func TestSync(t *testing.T) {
 	err = target.Resolve(false)
 	require.NoError(t, err)
 
+	if !isFileExist(filepath.Join(outputRootDir, "proto/stream.proto")) {
+		t.Error("not found file [stream.proto]")
+	}
+	if !isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/empty.proto")) {
+		t.Error("not found file [empty.proto]")
+	}
 
 	// fetch
 	err = target.Resolve(false)
 	require.NoError(t, err)
+}
+
+func isFileExist(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
 }

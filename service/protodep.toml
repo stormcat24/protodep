@@ -3,3 +3,6 @@ proto_outdir = "./proto"
 [[dependencies]]
   target = "github.com/openfresh/plasma/protobuf"
   branch = "master"
+[[dependencies]]
+  target = "github.com/google/protobuf/src"
+  branch = "master"

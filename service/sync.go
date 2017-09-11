@@ -1,13 +1,14 @@
 package service
 
 import (
-	"github.com/stormcat24/protodep/helper"
-	"strings"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
+
 	"github.com/stormcat24/protodep/dependency"
+	"github.com/stormcat24/protodep/helper"
 	"github.com/stormcat24/protodep/repository"
-	"io/ioutil"
 )
 
 type protoResource struct {
@@ -46,6 +47,11 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 	newdeps := make([]dependency.ProtoDepDependency, 0, len(protodep.Dependencies))
 	protodepDir := filepath.Join(s.userHomeDir, ".protodep")
 
+	outdir := filepath.Join(s.outputRootDir, protodep.ProtoOutdir)
+	if err := os.RemoveAll(outdir); err != nil {
+		return err
+	}
+
 	for _, dep := range protodep.Dependencies {
 		gitrepo := repository.NewGitRepository(protodepDir, dep, s.authProvider)
 
@@ -53,8 +59,6 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 		if err != nil {
 			return err
 		}
-
-		outdir := filepath.Join(s.outputRootDir, protodep.ProtoOutdir)
 
 		sources := make([]protoResource, 0)
 
@@ -71,10 +75,6 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 			}
 			return nil
 		})
-
-		if err := os.RemoveAll(outdir); err != nil {
-			return err
-		}
 
 		for _, s := range sources {
 			outpath := filepath.Join(outdir, s.relativeDest)
