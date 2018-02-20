@@ -8,9 +8,9 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stormcat24/protodep/dependency"
 	"github.com/stormcat24/protodep/helper"
+	"github.com/stormcat24/protodep/logger"
 	"gopkg.in/src-d/go-git.v4"
 	"gopkg.in/src-d/go-git.v4/plumbing"
-	"github.com/stormcat24/protodep/logger"
 )
 
 type GitRepository interface {
@@ -62,7 +62,7 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 		spinner.Stop()
 
 		fetchOpts := &git.FetchOptions{
-			Auth:     r.authProvider.AuthMethod(),
+			Auth: r.authProvider.AuthMethod(),
 		}
 
 		if err := rep.Fetch(fetchOpts); err != nil {
@@ -75,8 +75,8 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 	} else {
 		spinner := logger.InfoWithSpinner("Getting %s ", reponame)
 		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
-			Auth:     r.authProvider.AuthMethod(),
-			URL:      r.authProvider.GetRepositoryURL(reponame),
+			Auth: r.authProvider.AuthMethod(),
+			URL:  r.authProvider.GetRepositoryURL(reponame),
 		})
 		if err != nil {
 			return nil, errors.Wrap(err, "clone repository is failed")
@@ -103,7 +103,7 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 		if err := rep.Storer.SetReference(head); err != nil {
 			return nil, errors.Wrapf(err, "set head to %s is failed", branch)
 		}
-	} else  {
+	} else {
 		hash := plumbing.NewHash(revision)
 		if err := wt.Checkout(&git.CheckoutOptions{Hash: hash}); err != nil {
 			return nil, errors.Wrapf(err, "checkout to %s is failed", revision)
@@ -127,8 +127,8 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 
 	return &OpenedRepository{
 		Repository: rep,
-		Dep: r.dep,
-		Hash: current.Hash.String(),
+		Dep:        r.dep,
+		Hash:       current.Hash.String(),
 	}, nil
 }
 

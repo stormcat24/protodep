@@ -26,4 +26,5 @@ func TestLoad(t *testing.T) {
 	require.Equal(t, "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb", withRevision.Target)
 	require.Equal(t, "", withRevision.Branch)
 	require.Equal(t, "v1.2.2", withRevision.Revision)
+	require.Equal(t, "grpc-gateway/examplepb", withRevision.Path)
 }

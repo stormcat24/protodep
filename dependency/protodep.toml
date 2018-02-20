@@ -7,3 +7,4 @@ proto_outdir = "./proto"
 [[dependencies]]
   target = "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb"
   revision = "v1.2.2"
+  path = "grpc-gateway/examplepb"
