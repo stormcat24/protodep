@@ -77,7 +77,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 		})
 
 		for _, s := range sources {
-			outpath := filepath.Join(outdir, s.relativeDest)
+			outpath := filepath.Join(outdir, dep.Path, s.relativeDest)
 
 			content, err := ioutil.ReadFile(s.source)
 			if err != nil {
@@ -93,6 +93,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 			Target:   repo.Dep.Target,
 			Branch:   repo.Dep.Branch,
 			Revision: repo.Hash,
+			Path:     repo.Dep.Path,
 		})
 	}
 

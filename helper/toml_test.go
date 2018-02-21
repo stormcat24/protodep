@@ -1,10 +1,11 @@
 package helper
 
 import (
-	"testing"
-	"github.com/stormcat24/protodep/dependency"
 	"os"
 	"path/filepath"
+	"testing"
+
+	"github.com/stormcat24/protodep/dependency"
 	"github.com/stretchr/testify/require"
 )
 

@@ -2,11 +2,11 @@ package dependency
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
-	"os"
 )
 
 type Dependency interface {

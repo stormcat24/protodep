@@ -1,11 +1,12 @@
 package helper
 
 import (
-	"testing"
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"testing"
+
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
 )
 
 func TestWriteFileWithDirectory(t *testing.T) {

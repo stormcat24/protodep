@@ -1,10 +1,11 @@
 package helper
 
 import (
+	"io/ioutil"
 	"os"
 	"strings"
+
 	"github.com/pkg/errors"
-	"io/ioutil"
 )
 
 func WriteFileWithDirectory(path string, data []byte, perm os.FileMode) error {
@@ -13,7 +14,7 @@ func WriteFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 
 	var dir string
 	if len(s) > 1 {
-		dir = strings.Join(s[0:len(s) -1], "/")
+		dir = strings.Join(s[0:len(s)-1], "/")
 	} else {
 		dir = path
 	}

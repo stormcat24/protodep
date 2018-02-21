@@ -2,6 +2,7 @@ package dependency
 
 import (
 	"testing"
+
 	"github.com/stretchr/testify/require"
 )
 

@@ -2,9 +2,10 @@ package helper
 
 import (
 	"bytes"
+	"io/ioutil"
+
 	"github.com/BurntSushi/toml"
 	"github.com/pkg/errors"
-	"io/ioutil"
 )
 
 func WriteToml(dest string, input interface{}) error {
