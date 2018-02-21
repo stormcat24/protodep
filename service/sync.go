@@ -8,6 +8,7 @@ import (
 
 	"github.com/stormcat24/protodep/dependency"
 	"github.com/stormcat24/protodep/helper"
+	"github.com/stormcat24/protodep/logger"
 	"github.com/stormcat24/protodep/repository"
 )
 
@@ -68,10 +69,14 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 				return err
 			}
 			if strings.HasSuffix(path, ".proto") {
-				sources = append(sources, protoResource{
-					source:       path,
-					relativeDest: strings.Replace(path, protoRootDir, "", -1),
-				})
+				if s.isIgnorePath(protoRootDir, path, dep.Ignores) {
+					logger.Info("skipped %s due to ignore setting", path)
+				} else {
+					sources = append(sources, protoResource{
+						source:       path,
+						relativeDest: strings.Replace(path, protoRootDir, "", -1),
+					})
+				}
 			}
 			return nil
 		})
@@ -94,6 +99,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 			Branch:   repo.Dep.Branch,
 			Revision: repo.Hash,
 			Path:     repo.Dep.Path,
+			Ignores:  repo.Dep.Ignores,
 		})
 	}
 
@@ -109,4 +115,16 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 	}
 
 	return nil
+}
+
+func (s *SyncImpl) isIgnorePath(protoRootDir string, target string, ignores []string) bool {
+
+	for _, ignore := range ignores {
+		pathPrefix := filepath.Join(protoRootDir, ignore)
+		if strings.HasPrefix(target, pathPrefix) {
+			return true
+		}
+	}
+
+	return false
 }

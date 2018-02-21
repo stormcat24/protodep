@@ -25,9 +25,9 @@ func TestSync(t *testing.T) {
 
 	authProviderMock := helper.NewMockAuthProvider(c)
 	authProviderMock.EXPECT().AuthMethod().Return(nil).AnyTimes()
-	authProviderMock.EXPECT().GetRepositoryURL(gomock.Any()).Return("https://github.com/google/protobuf.git").After(
-		authProviderMock.EXPECT().GetRepositoryURL(gomock.Any()).Return("https://github.com/openfresh/plasma.git"),
-	)
+	authProviderMock.EXPECT().GetRepositoryURL("github.com/google/protobuf").Return("https://github.com/google/protobuf.git")
+	authProviderMock.EXPECT().GetRepositoryURL("github.com/openfresh/plasma").Return("https://github.com/openfresh/plasma.git")
+	authProviderMock.EXPECT().GetRepositoryURL("github.com/kubernetes/helm").Return("https://github.com/kubernetes/helm.git")
 
 	pwd, err := os.Getwd()
 	require.NoError(t, err)
@@ -40,10 +40,13 @@ func TestSync(t *testing.T) {
 	require.NoError(t, err)
 
 	if !isFileExist(filepath.Join(outputRootDir, "proto/stream.proto")) {
-		t.Error("not found file [stream.proto]")
+		t.Error("not found file [proto/stream.proto]")
 	}
 	if !isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/empty.proto")) {
-		t.Error("not found file [empty.proto]")
+		t.Error("not found file [proto/google/protobuf/empty.proto]")
+	}
+	if !isFileExist(filepath.Join(outputRootDir, "proto/chart/chart.proto")) {
+		t.Error("not found file [proto/chart/chart.proto]")
 	}
 
 	// fetch

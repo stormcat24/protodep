@@ -14,10 +14,11 @@ func TestLoad(t *testing.T) {
 
 	actual, err := target.Load()
 	require.NoError(t, err)
-	require.Equal(t, 2, len(actual.Dependencies))
+	require.Equal(t, 3, len(actual.Dependencies))
 
 	withBranch := actual.Dependencies[0]
 	withRevision := actual.Dependencies[1]
+	withIgnore := actual.Dependencies[2]
 
 	require.Equal(t, "github.com/google/protobuf/examples", withBranch.Target)
 	require.Equal(t, "master", withBranch.Branch)
@@ -27,4 +28,9 @@ func TestLoad(t *testing.T) {
 	require.Equal(t, "", withRevision.Branch)
 	require.Equal(t, "v1.2.2", withRevision.Revision)
 	require.Equal(t, "grpc-gateway/examplepb", withRevision.Path)
+
+	require.Equal(t, "github.com/kubernetes/helm/_proto/hapi", withIgnore.Target)
+	require.Equal(t, "", withIgnore.Branch)
+	require.Equal(t, "v2.8.1", withIgnore.Revision)
+	require.Equal(t, []string{"./release", "./rudder", "./services", "./version"}, withIgnore.Ignores)
 }
