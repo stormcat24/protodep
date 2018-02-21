@@ -56,6 +56,13 @@ proto_outdir = "./proto"
 [[dependencies]]
   target = "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb"
   revision = "v1.2.2"
+  path = "grpc-gateway/examplepb"
+
+[[dependencies]]
+  target = "github.com/kubernetes/helm/_proto/hapi"
+  branch = "master"
+  path = "helm/hapi"
+  ignores = ["./release", "./rudder", "./services", "./version"]
 ```
 
 ### protodep up
