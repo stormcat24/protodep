@@ -20,7 +20,7 @@ func TestLoad(t *testing.T) {
 	withRevision := actual.Dependencies[1]
 	withIgnore := actual.Dependencies[2]
 
-	require.Equal(t, "github.com/google/protobuf/examples", withBranch.Target)
+	require.Equal(t, "github.com/protocolbuffers/protobuf/src", withBranch.Target)
 	require.Equal(t, "master", withBranch.Branch)
 	require.Equal(t, "", withBranch.Revision)
 
