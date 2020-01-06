@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.13
+    working_directory: /go/src/github.com/stormcat24/protodep
+    steps:
+    - checkout
+    - run: 
+        name: Resolve vendor
+        command: make vendor
+    - run: 
+        name: Test 
+        command: make test
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - build 
