@@ -1,14 +1,9 @@
 proto_outdir = "./proto"
 
 [[dependencies]]
-  target = "github.com/openfresh/plasma/protobuf"
+  target = "github.com/opensaasstudio/plasma/protobuf"
   branch = "master"
 
 [[dependencies]]
-  target = "github.com/google/protobuf/src"
+  target = "github.com/protocolbuffers/protobuf/src"
   branch = "master"
-
-[[dependencies]]
-  target = "github.com/kubernetes/helm/_proto/hapi"
-  branch = "master"
-  ignores = ["./release", "./rudder", "./services", "./version"]
