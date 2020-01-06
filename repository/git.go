@@ -109,6 +109,16 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 			return nil, errors.Wrapf(err, "checkout to %s is failed", revision)
 		}
 
+		tag := plumbing.NewTagReferenceName(revision)
+		ref, err := rep.Reference(tag, false)
+		if err != nil && err != plumbing.ErrReferenceNotFound {
+			return nil, errors.Wrapf(err, "tag = %s", tag)
+		}
+
+		if ref != nil {
+			hash = ref.Hash()
+		}
+
 		head := plumbing.NewHashReference(plumbing.HEAD, hash)
 		if err := rep.Storer.SetReference(head); err != nil {
 			return nil, errors.Wrapf(err, "set head to %s is failed", revision)
