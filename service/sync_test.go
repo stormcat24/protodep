@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,11 +26,12 @@ func TestSync(t *testing.T) {
 
 	authProviderMock := helper.NewMockAuthProvider(c)
 	authProviderMock.EXPECT().AuthMethod().Return(nil).AnyTimes()
-	authProviderMock.EXPECT().GetRepositoryURL("github.com/google/protobuf").Return("https://github.com/google/protobuf.git")
-	authProviderMock.EXPECT().GetRepositoryURL("github.com/openfresh/plasma").Return("https://github.com/openfresh/plasma.git")
-	authProviderMock.EXPECT().GetRepositoryURL("github.com/kubernetes/helm").Return("https://github.com/kubernetes/helm.git")
+	authProviderMock.EXPECT().GetRepositoryURL("github.com/protocolbuffers/protobuf").Return("https://github.com/protocolbuffers/protobuf.git")
+	authProviderMock.EXPECT().GetRepositoryURL("github.com/opensaasstudio/plasma").Return("https://github.com/opensaasstudio/plasma.git")
 
 	pwd, err := os.Getwd()
+	fmt.Println(pwd)
+
 	require.NoError(t, err)
 
 	outputRootDir := os.TempDir()
@@ -44,9 +46,6 @@ func TestSync(t *testing.T) {
 	}
 	if !isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/empty.proto")) {
 		t.Error("not found file [proto/google/protobuf/empty.proto]")
-	}
-	if !isFileExist(filepath.Join(outputRootDir, "proto/chart/chart.proto")) {
-		t.Error("not found file [proto/chart/chart.proto]")
 	}
 
 	// fetch

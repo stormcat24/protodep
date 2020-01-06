@@ -1,7 +1,7 @@
 proto_outdir = "./proto"
 
 [[dependencies]]
-  target = "github.com/google/protobuf/examples"
+  target = "github.com/protocolbuffers/protobuf/src"
   branch = "master"
 
 [[dependencies]]
