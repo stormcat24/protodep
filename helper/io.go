@@ -3,6 +3,7 @@ package helper
 import (
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -10,6 +11,7 @@ import (
 
 func WriteFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 
+	path = filepath.ToSlash(path)
 	s := strings.Split(path, "/")
 
 	var dir string
@@ -18,6 +20,9 @@ func WriteFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 	} else {
 		dir = path
 	}
+
+	dir = filepath.FromSlash(dir)
+	path = filepath.FromSlash(path)
 
 	if err := os.MkdirAll(dir, 0777); err != nil {
 		return errors.Wrapf(err, "create directory is failed. [%s]", dir)
