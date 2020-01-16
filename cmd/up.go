@@ -32,6 +32,12 @@ var upCmd = &cobra.Command{
 		}
 		logger.Info("force update = %t", isForceUpdate)
 
+		isCleanupCache, err := cmd.Flags().GetBool("cleanup")
+		if err != nil {
+			return err
+		}
+		logger.Info("cleanup cache = %t", isCleanupCache)
+
 		identityFile, err := cmd.Flags().GetString("identity-file")
 		if err != nil {
 			return err
@@ -58,7 +64,7 @@ var upCmd = &cobra.Command{
 
 		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile), password)
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
-		return updateService.Resolve(isForceUpdate)
+		return updateService.Resolve(isForceUpdate, isCleanupCache)
 	},
 }
 
@@ -66,4 +72,5 @@ func initDepCmd() {
 	upCmd.PersistentFlags().BoolP("force", "f", false, "update locked file and .proto vendors")
 	upCmd.PersistentFlags().StringP("identity-file", "i", "id_rsa", "set the identity file for SSH")
 	upCmd.PersistentFlags().StringP("password", "p", "", "set the password for SSH")
+	upCmd.PersistentFlags().BoolP("cleanup", "c", false, "cleanup cache before exec.")
 }

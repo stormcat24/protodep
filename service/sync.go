@@ -18,7 +18,7 @@ type protoResource struct {
 }
 
 type Sync interface {
-	Resolve(forceUpdate bool) error
+	Resolve(forceUpdate bool, cleanupCache bool) error
 }
 
 type SyncImpl struct {
@@ -37,7 +37,7 @@ func NewSync(authProvider helper.AuthProvider, userHomeDir string, targetDir str
 	}
 }
 
-func (s *SyncImpl) Resolve(forceUpdate bool) error {
+func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 
 	dep := dependency.NewDependency(s.targetDir, forceUpdate)
 	protodep, err := dep.Load()
@@ -47,6 +47,20 @@ func (s *SyncImpl) Resolve(forceUpdate bool) error {
 
 	newdeps := make([]dependency.ProtoDepDependency, 0, len(protodep.Dependencies))
 	protodepDir := filepath.Join(s.userHomeDir, ".protodep")
+
+	if cleanupCache {
+		files, _ := ioutil.ReadDir(protodepDir)
+		if err == nil {
+			for _, file := range files {
+				if file.IsDir() {
+					dirpath := filepath.Join(protodepDir, file.Name())
+					if err := os.RemoveAll(dirpath); err != nil {
+						return err
+					}
+				}
+			}
+		}
+	}
 
 	outdir := filepath.Join(s.outputRootDir, protodep.ProtoOutdir)
 	if err := os.RemoveAll(outdir); err != nil {
