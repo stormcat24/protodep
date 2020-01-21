@@ -27,6 +27,7 @@ build-all: tidy vendor
 		$(call build-artifact,linux,arm)
 		$(call build-artifact,linux,arm64)
 		$(call build-artifact,darwin,amd64)
+		$(call build-artifact,windows,amd64)
 
 .PHONY: clean
 clean:
