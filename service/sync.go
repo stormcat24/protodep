@@ -48,15 +48,17 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 	newdeps := make([]dependency.ProtoDepDependency, 0, len(protodep.Dependencies))
 	protodepDir := filepath.Join(s.userHomeDir, ".protodep")
 
-	if cleanupCache {
-		files, _ := ioutil.ReadDir(protodepDir)
-		if err == nil {
-			for _, file := range files {
-				if file.IsDir() {
-					dirpath := filepath.Join(protodepDir, file.Name())
-					if err := os.RemoveAll(dirpath); err != nil {
-						return err
-					}
+	_, err = os.Stat(protodepDir)
+	if cleanupCache && err == nil {
+		files, err := ioutil.ReadDir(protodepDir)
+		if err != nil {
+			return err
+		}
+		for _, file := range files {
+			if file.IsDir() {
+				dirpath := filepath.Join(protodepDir, file.Name())
+				if err := os.RemoveAll(dirpath); err != nil {
+					return err
 				}
 			}
 		}
