@@ -14,20 +14,20 @@ build: tidy vendor
 		GO111MODULE=on GOOS=$(GOOS) GOARCH=$(GOARCH) go build -ldflags="-w -s" -o bin/protodep -mod=vendor main.go
 
 define build-artifact
-		GO111MODULE=on GOOS=$(1) GOARCH=$(2) go build -ldflags="-w -s" -o artifacts/$(APP) -mod=vendor main.go
-		cd artifacts && tar cvzf $(APP)_$(1)_$(2).tar.gz $(APP)
-		rm ./artifacts/$(APP)
+		GO111MODULE=on GOOS=$(1) GOARCH=$(2) go build -ldflags="-w -s" -o artifacts/$(3) -mod=vendor main.go
+		cd artifacts && tar cvzf $(APP)_$(1)_$(2).tar.gz $(3)
+		rm ./artifacts/$(3)
 		@echo [INFO]build success: $(1)_$(2)
 endef
 
 .PHONY: build-all
 build-all: tidy vendor
-		$(call build-artifact,linux,386)
-		$(call build-artifact,linux,amd64)
-		$(call build-artifact,linux,arm)
-		$(call build-artifact,linux,arm64)
-		$(call build-artifact,darwin,amd64)
-		$(call build-artifact,windows,amd64)
+		$(call build-artifact,linux,386,$(APP))
+		$(call build-artifact,linux,amd64,$(APP))
+		$(call build-artifact,linux,arm,$(APP))
+		$(call build-artifact,linux,arm64,$(APP))
+		$(call build-artifact,darwin,amd64,$(APP))
+		$(call build-artifact,windows,amd64,$(APP).exe)
 
 .PHONY: clean
 clean:
