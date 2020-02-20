@@ -25,7 +25,7 @@ func TestSync(t *testing.T) {
 	defer c.Finish()
 
 	authProviderMock := helper.NewMockAuthProvider(c)
-	authProviderMock.EXPECT().AuthMethod().Return(nil).AnyTimes()
+	authProviderMock.EXPECT().AuthMethod().Return(nil, nil).AnyTimes()
 	authProviderMock.EXPECT().GetRepositoryURL("github.com/protocolbuffers/protobuf").Return("https://github.com/protocolbuffers/protobuf.git")
 	authProviderMock.EXPECT().GetRepositoryURL("github.com/opensaasstudio/plasma").Return("https://github.com/opensaasstudio/plasma.git")
 

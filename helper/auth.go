@@ -10,7 +10,7 @@ import (
 
 type AuthProvider interface {
 	GetRepositoryURL(reponame string) string
-	AuthMethod() transport.AuthMethod
+	AuthMethod() (transport.AuthMethod, error)
 }
 
 type AuthProviderWithSSH struct {
@@ -42,19 +42,19 @@ func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
 	return ep.String()
 }
 
-func (p *AuthProviderWithSSH) AuthMethod() transport.AuthMethod {
+func (p *AuthProviderWithSSH) AuthMethod() (transport.AuthMethod, error) {
 	am, err := ssh.NewPublicKeysFromFile("git", p.pemFile, p.password)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return am
+	return am, nil
 }
 
 func (p *AuthProviderHTTPS) GetRepositoryURL(reponame string) string {
 	return fmt.Sprintf("https://%s.git", reponame)
 }
 
-func (p *AuthProviderHTTPS) AuthMethod() transport.AuthMethod {
+func (p *AuthProviderHTTPS) AuthMethod() (transport.AuthMethod, error) {
 	// nil is ok.
-	return nil
+	return nil, nil
 }
