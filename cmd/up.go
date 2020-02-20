@@ -62,7 +62,17 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		authProvider = helper.NewAuthProvider(filepath.Join(homeDir, ".ssh", identityFile), password)
+		identifyPath := filepath.Join(homeDir, ".ssh", identityFile)
+		isSSH, err := helper.IsAvailableSSH(identifyPath)
+		if err != nil {
+			return err
+		}
+		if isSSH {
+			authProvider = helper.NewAuthProvider(identifyPath, password)
+		} else {
+			authProvider = helper.NewAuthProvider("", "")
+		}
+
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
 		return updateService.Resolve(isForceUpdate, isCleanupCache)
 	},

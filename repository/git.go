@@ -50,6 +50,11 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 	reponame := r.dep.Repository()
 	repopath := filepath.Join(r.protodepDir, reponame)
 
+	auth, err := r.authProvider.AuthMethod()
+	if err != nil {
+		return nil, err
+	}
+
 	var rep *git.Repository
 
 	if stat, err := os.Stat(repopath); err == nil && stat.IsDir() {
@@ -62,8 +67,11 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 		spinner.Stop()
 
 		fetchOpts := &git.FetchOptions{
-			Auth: r.authProvider.AuthMethod(),
+			Auth: auth,
 		}
+
+		// TODO: Validate remote setting.
+		// TODO: If .protodep cache remains with SSH, change remote target to HTTPS.
 
 		if err := rep.Fetch(fetchOpts); err != nil {
 			if err != git.NoErrAlreadyUpToDate {
@@ -74,8 +82,9 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 
 	} else {
 		spinner := logger.InfoWithSpinner("Getting %s ", reponame)
+		// IDEA: Is it better to register both ssh and HTTP?
 		rep, err = git.PlainClone(repopath, false, &git.CloneOptions{
-			Auth: r.authProvider.AuthMethod(),
+			Auth: auth,
 			URL:  r.authProvider.GetRepositoryURL(reponame),
 		})
 		if err != nil {
