@@ -36,8 +36,9 @@ Support as follows:
 * protodep_linux_arm64.tar.gz
 
 ```bash
-$ wget https://github.com/stormcat24/protodep/releases/download/0.0.5/protodep_darwin_amd64.tar.gz
-$ cp protodep /usr/local/bin/
+$ wget https://github.com/stormcat24/protodep/releases/download/0.0.8/protodep_darwin_amd64.tar.gz
+$ tar -xf protodep_darwin_amd64.tar.gz
+$ mv protodep /usr/local/bin/
 ```
 
 ## Usage
