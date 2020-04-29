@@ -48,6 +48,27 @@ func TestSync(t *testing.T) {
 		t.Error("not found file [proto/google/protobuf/empty.proto]")
 	}
 
+	// check ignore worked
+	// hasPrefix test - backward compatibility
+	if isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/test_messages_proto3.proto")) {
+		t.Error("found file [proto/google/protobuf/test_messages_proto3.proto]")
+	}
+
+	// glob test 1
+	if isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/test_messages_proto2.proto")) {
+		t.Error("found file [proto/google/protobuf/test_messages_proto2.proto]")
+	}
+
+	// glob test 2
+	if isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/test_messages_proto2.proto")) {
+		t.Error("found file [proto/google/protobuf/test_messages_proto2.proto]")
+	}
+
+	// glob test 3
+	if isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/util/internal/testdata/")) {
+		t.Error("found file [proto/google/protobuf/util/internal/testdata/]")
+	}
+
 	// fetch
 	err = target.Resolve(false, false)
 	require.NoError(t, err)
