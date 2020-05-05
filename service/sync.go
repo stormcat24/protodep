@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gobwas/glob"
 	"github.com/stormcat24/protodep/dependency"
 	"github.com/stormcat24/protodep/helper"
 	"github.com/stormcat24/protodep/logger"
@@ -79,13 +80,15 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 
 		sources := make([]protoResource, 0)
 
+		compiledIgnores := compileIngoresToGlob(dep.Ignores)
+
 		protoRootDir := gitrepo.ProtoRootDir()
 		filepath.Walk(protoRootDir, func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
 			if strings.HasSuffix(path, ".proto") {
-				if s.isIgnorePath(protoRootDir, path, dep.Ignores) {
+				if s.isIgnorePath(protoRootDir, path, dep.Ignores, compiledIgnores) {
 					logger.Info("skipped %s due to ignore setting", path)
 				} else {
 					sources = append(sources, protoResource{
@@ -133,11 +136,31 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 	return nil
 }
 
-func (s *SyncImpl) isIgnorePath(protoRootDir string, target string, ignores []string) bool {
+func compileIngoresToGlob(ignores []string) []glob.Glob {
+	globIngores := make([]glob.Glob, len(ignores))
 
+	for idx, ignore := range ignores {
+		globIngores[idx] = glob.MustCompile(ignore)
+	}
+
+	return globIngores
+}
+
+func (s *SyncImpl) isIgnorePath(protoRootDir string, target string, ignores []string, globIgnores []glob.Glob) bool {
+	// convert slashes otherwise doesnt work on windows same was as on linux
+	target = filepath.ToSlash(target)
+
+	// keeping old logic for backward compatibility
 	for _, ignore := range ignores {
-		pathPrefix := filepath.Join(protoRootDir, ignore)
+		// support windows paths correctly
+		pathPrefix := filepath.ToSlash(filepath.Join(protoRootDir, ignore))
 		if strings.HasPrefix(target, pathPrefix) {
+			return true
+		}
+	}
+
+	for _, ignore := range globIgnores {
+		if ignore.Match(target) {
 			return true
 		}
 	}
