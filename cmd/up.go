@@ -69,8 +69,7 @@ var upCmd = &cobra.Command{
 		}
 
 		if useHttps {
-			// TODO: authProvider = helper.NewAuthProvider(helper.WithHTTPS())
-			authProvider = helper.NewAuthProvider()
+			authProvider = helper.NewAuthProvider(helper.WithHTTPS())
 		} else {
 			if identityFile == "" && password == "" {
 				authProvider = helper.NewAuthProvider()
