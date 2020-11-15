@@ -3,10 +3,36 @@ package helper
 import (
 	"fmt"
 
-	"github.com/stormcat24/protodep/logger"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
 )
+
+type authMethod string
+
+const(
+	SSHAgent authMethod = "SSHAgent"
+	SSH = "SSH"
+	HTTPS = "HTTPS"
+)
+
+type authOptions struct {
+	method authMethod
+	pemFile string
+	password string
+}
+
+type funcAuthOption struct {
+	f func(options *authOptions)
+}
+
+func (fao *funcAuthOption) apply(do *authOptions) {
+	fao.f(do)
+}
+
+
+type AuthOption interface {
+	apply(*authOptions)
+}
 
 type AuthProvider interface {
 	GetRepositoryURL(reponame string) string
@@ -18,20 +44,43 @@ type AuthProviderWithSSH struct {
 	password string
 }
 
+type AuthProviderWithSSHAgent struct {
+}
+
 type AuthProviderHTTPS struct {
 }
 
-func NewAuthProvider(pemFile, password string) AuthProvider {
-	if pemFile != "" {
-		logger.Info("use SSH protocol")
-		return &AuthProviderWithSSH{
-			pemFile:  pemFile,
-			password: password,
+func WithPemFile(pemFile, password string) AuthOption {
+	return &funcAuthOption{
+		f: func(options *authOptions) {
+			options.method = SSH
+			options.password = password
+			options.pemFile = pemFile
+		},
+	}
+}
+
+func NewAuthProvider(opt ...AuthOption) AuthProvider {
+	opts := authOptions{
+		method: SSHAgent,
+	}
+	for _, o := range opt {
+		o.apply(&opts)
+	}
+
+	var authProvider AuthProvider
+	if opts.method == SSHAgent {
+		authProvider = &AuthProviderWithSSHAgent{}
+	} else if opts.method == SSH {
+		authProvider = &AuthProviderWithSSH{
+			pemFile:  opts.pemFile,
+			password: opts.password,
 		}
 	} else {
-		logger.Info("use HTTP/HTTPS protocol")
-		return &AuthProviderHTTPS{}
+		authProvider = &AuthProviderHTTPS{}
 	}
+
+	return authProvider
 }
 
 func (p *AuthProviderWithSSH) GetRepositoryURL(reponame string) string {
@@ -48,6 +97,22 @@ func (p *AuthProviderWithSSH) AuthMethod() (transport.AuthMethod, error) {
 		return nil, err
 	}
 	return am, nil
+}
+
+func (p *AuthProviderWithSSHAgent) GetRepositoryURL(reponame string) string {
+	ep, err := transport.NewEndpoint("ssh://" + reponame + ".git")
+	if err != nil {
+		panic(err)
+	}
+	return ep.String()
+}
+
+func (p *AuthProviderWithSSHAgent) AuthMethod() (transport.AuthMethod, error) {
+	aa, err := ssh.NewSSHAgentAuth(ssh.DefaultUsername)
+	if err != nil {
+		panic(err)
+	}
+	return aa, nil
 }
 
 func (p *AuthProviderHTTPS) GetRepositoryURL(reponame string) string {
