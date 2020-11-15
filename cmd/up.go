@@ -52,6 +52,12 @@ var upCmd = &cobra.Command{
 			logger.Info("password = %s", strings.Repeat("x", len(password))) // Do not display the password.
 		}
 
+		useHttps, err := cmd.Flags().GetBool("use-https")
+		if err != nil {
+			return err
+		}
+		logger.Info("use https = %t", useHttps)
+
 		pwd, err := os.Getwd()
 		if err != nil {
 			return err
@@ -62,21 +68,26 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		if identityFile == "" && password == "" {
+		if useHttps {
+			// TODO: authProvider = helper.NewAuthProvider(helper.WithHTTPS())
 			authProvider = helper.NewAuthProvider()
 		} else {
-			identifyPath := filepath.Join(homeDir, ".ssh", identityFile)
-			isSSH, err := helper.IsAvailableSSH(identifyPath)
-			if err != nil {
-				return err
-			}
-			if isSSH {
-				authProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, password))
-			} else {
+			if identityFile == "" && password == "" {
 				authProvider = helper.NewAuthProvider()
+			} else {
+				identifyPath := filepath.Join(homeDir, ".ssh", identityFile)
+				isSSH, err := helper.IsAvailableSSH(identifyPath)
+				if err != nil {
+					return err
+				}
+				if isSSH {
+					authProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, password))
+				} else {
+					authProvider = helper.NewAuthProvider()
+				}
 			}
 		}
-
+    
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
 		return updateService.Resolve(isForceUpdate, isCleanupCache)
 	},
@@ -87,4 +98,5 @@ func initDepCmd() {
 	upCmd.PersistentFlags().StringP("identity-file", "i", "", "set the identity file for SSH")
 	upCmd.PersistentFlags().StringP("password", "p", "", "set the password for SSH")
 	upCmd.PersistentFlags().BoolP("cleanup", "c", false, "cleanup cache before exec.")
+	upCmd.PersistentFlags().BoolP("use-https", "u", false, "use HTTPS to get dependencies.")
 }
