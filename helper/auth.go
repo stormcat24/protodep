@@ -50,6 +50,14 @@ type AuthProviderWithSSHAgent struct {
 type AuthProviderHTTPS struct {
 }
 
+func WithHTTPS() AuthOption {
+	return &funcAuthOption{
+		f: func(options *authOptions) {
+			options.method = HTTPS
+		},
+	}
+}
+
 func WithPemFile(pemFile, password string) AuthOption {
 	return &funcAuthOption{
 		f: func(options *authOptions) {
