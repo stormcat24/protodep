@@ -2,6 +2,7 @@ package helper
 
 import (
 	"fmt"
+	"gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 
 	"gopkg.in/src-d/go-git.v4/plumbing/transport"
 	"gopkg.in/src-d/go-git.v4/plumbing/transport/ssh"
@@ -9,15 +10,16 @@ import (
 
 type authMethod string
 
-const(
+const (
 	SSHAgent authMethod = "SSHAgent"
-	SSH = "SSH"
-	HTTPS = "HTTPS"
+	SSH                 = "SSH"
+	HTTPS               = "HTTPS"
 )
 
 type authOptions struct {
-	method authMethod
-	pemFile string
+	method   authMethod
+	pemFile  string
+	username string
 	password string
 }
 
@@ -28,7 +30,6 @@ type funcAuthOption struct {
 func (fao *funcAuthOption) apply(do *authOptions) {
 	fao.f(do)
 }
-
 
 type AuthOption interface {
 	apply(*authOptions)
@@ -48,12 +49,16 @@ type AuthProviderWithSSHAgent struct {
 }
 
 type AuthProviderHTTPS struct {
+	username string
+	password string
 }
 
-func WithHTTPS() AuthOption {
+func WithHTTPS(username, password string) AuthOption {
 	return &funcAuthOption{
 		f: func(options *authOptions) {
 			options.method = HTTPS
+			options.username = username
+			options.password = password
 		},
 	}
 }
@@ -85,7 +90,10 @@ func NewAuthProvider(opt ...AuthOption) AuthProvider {
 			password: opts.password,
 		}
 	} else {
-		authProvider = &AuthProviderHTTPS{}
+		authProvider = &AuthProviderHTTPS{
+			username: opts.username,
+			password: opts.password,
+		}
 	}
 
 	return authProvider
@@ -128,6 +136,11 @@ func (p *AuthProviderHTTPS) GetRepositoryURL(reponame string) string {
 }
 
 func (p *AuthProviderHTTPS) AuthMethod() (transport.AuthMethod, error) {
-	// nil is ok.
-	return nil, nil
+	if p.username == "" && p.password == "" {
+		return nil, nil
+	}
+	return &http.BasicAuth{
+		Username: p.username,
+		Password: p.password,
+	}, nil
 }
