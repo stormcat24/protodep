@@ -58,6 +58,22 @@ var upCmd = &cobra.Command{
 		}
 		logger.Info("use https = %t", useHttps)
 
+		basicAuthUsername, err := cmd.Flags().GetString("basic-auth-username")
+		if err != nil {
+			return err
+		}
+		if basicAuthUsername != "" {
+			logger.Info("https basic auth username = %s", basicAuthUsername)
+		}
+
+		basicAuthPassword, err := cmd.Flags().GetString("basic-auth-password")
+		if err != nil {
+			return err
+		}
+		if basicAuthPassword != "" {
+			logger.Info("https basic auth username = %s", strings.Repeat("x", len(basicAuthPassword))) // Do not display the password.
+		}
+
 		pwd, err := os.Getwd()
 		if err != nil {
 			return err
@@ -69,7 +85,7 @@ var upCmd = &cobra.Command{
 		}
 
 		if useHttps {
-			authProvider = helper.NewAuthProvider(helper.WithHTTPS())
+			authProvider = helper.NewAuthProvider(helper.WithHTTPS(basicAuthUsername, basicAuthPassword))
 		} else {
 			if identityFile == "" && password == "" {
 				authProvider = helper.NewAuthProvider()
@@ -98,4 +114,6 @@ func initDepCmd() {
 	upCmd.PersistentFlags().StringP("password", "p", "", "set the password for SSH")
 	upCmd.PersistentFlags().BoolP("cleanup", "c", false, "cleanup cache before exec.")
 	upCmd.PersistentFlags().BoolP("use-https", "u", false, "use HTTPS to get dependencies.")
+	upCmd.PersistentFlags().StringP("basic-auth-username", "", "", "set the username with Basic Auth via HTTPS")
+	upCmd.PersistentFlags().StringP("basic-auth-password", "", "", "set the password or personal access token(when enabled 2FA) with Basic Auth via HTTPS")
 }

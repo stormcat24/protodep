@@ -84,6 +84,23 @@ Even if protodep.lock exists, you can force update dependenies.
 $ protodep up -f
 ```
 
+### Getting via HTTPS
+
+If you want to get it via HTTPS, do as follows.
+
+```bash
+$ protodep up --use-https
+```
+
+And also, if Basic authentication is required, do as follows.
+If you have 2FA enabled, specify the Personal Access Token as the password. 
+
+```bash
+$ protodep up --use-https \
+    --basic-auth-username=your-github-username \
+    --basic-auth-password=your-github-password
+```
+
 License
 ===
 See [LICENSE](LICENSE).
