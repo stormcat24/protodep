@@ -71,7 +71,7 @@ var upCmd = &cobra.Command{
 			return err
 		}
 		if basicAuthPassword != "" {
-			logger.Info("https basic auth username = %s", strings.Repeat("x", len(basicAuthPassword))) // Do not display the password.
+			logger.Info("https basic auth password = %s", strings.Repeat("x", len(basicAuthPassword))) // Do not display the password.
 		}
 
 		pwd, err := os.Getwd()
