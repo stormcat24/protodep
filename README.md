@@ -84,6 +84,18 @@ Even if protodep.lock exists, you can force update dependenies.
 $ protodep up -f
 ```
 
+### [Attention] Changes from 0.1.0
+
+From protodep 0.1.0 supports ssh-agent, and this is the default.
+In other words, in order to operate protodep without options as before, it is necessary to set with ssh-add.
+
+As the follows:
+
+```bash
+$ ssh-add ~/.ssh/id_rsa
+$ protodep up
+```
+
 ### Getting via HTTPS
 
 If you want to get it via HTTPS, do as follows.
