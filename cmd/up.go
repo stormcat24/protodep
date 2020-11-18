@@ -98,11 +98,12 @@ var upCmd = &cobra.Command{
 				if isSSH {
 					authProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, password))
 				} else {
+					logger.Warn("The identity file path has been passed but is not available. Falling back to ssh-agent, the default authentication method.")
 					authProvider = helper.NewAuthProvider()
 				}
 			}
 		}
-    
+
 		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
 		return updateService.Resolve(isForceUpdate, isCleanupCache)
 	},
