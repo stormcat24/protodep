@@ -12,6 +12,10 @@ func Info(format string, a ...interface{}) {
 	color.Green("[INFO] "+format, a...)
 }
 
+func Warn(format string, a ...interface{}) {
+	color.Yellow("[WARN] "+format, a...)
+}
+
 func Error(format string, a ...interface{}) {
 	color.Red("[ERROR] "+format, a...)
 }
