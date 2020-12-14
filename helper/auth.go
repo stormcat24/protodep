@@ -16,6 +16,15 @@ const (
 	HTTPS               = "HTTPS"
 )
 
+type AuthProviderConfig struct {
+	UseHttps bool
+	BasicAuthUsername string
+	BasicAuthPassword string
+	HomeDir string
+	IdentityFile string
+	IdentityPassword string
+}
+
 type authOptions struct {
 	method   authMethod
 	pemFile  string

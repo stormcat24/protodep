@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -23,16 +24,14 @@ type Sync interface {
 }
 
 type SyncImpl struct {
-	authProvider  helper.AuthProvider
-	userHomeDir   string
+	conf *helper.AuthProviderConfig
 	targetDir     string
 	outputRootDir string
 }
 
-func NewSync(authProvider helper.AuthProvider, userHomeDir string, targetDir string, outputRootDir string) Sync {
+func NewSync(conf *helper.AuthProviderConfig, targetDir string, outputRootDir string) Sync {
 	return &SyncImpl{
-		authProvider:  authProvider,
-		userHomeDir:   userHomeDir,
+		conf: conf,
 		targetDir:     targetDir,
 		outputRootDir: outputRootDir,
 	}
@@ -47,7 +46,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 	}
 
 	newdeps := make([]dependency.ProtoDepDependency, 0, len(protodep.Dependencies))
-	protodepDir := filepath.Join(s.userHomeDir, ".protodep")
+	protodepDir := filepath.Join(s.conf.HomeDir, ".protodep")
 
 	_, err = os.Stat(protodepDir)
 	if cleanupCache && err == nil {
@@ -70,8 +69,43 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 		return err
 	}
 
+	httpsAuthProvider := helper.NewAuthProvider(helper.WithHTTPS(s.conf.BasicAuthUsername, s.conf.BasicAuthPassword))
+
+	var sshAuthProvider helper.AuthProvider
+	if s.conf.IdentityFile == "" && s.conf.IdentityPassword == "" {
+		sshAuthProvider = helper.NewAuthProvider()
+	} else {
+		identifyPath := filepath.Join(s.conf.HomeDir, ".ssh", s.conf.IdentityFile)
+		isSSH, err := helper.IsAvailableSSH(identifyPath)
+		if err != nil {
+			return err
+		}
+		if isSSH {
+			sshAuthProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, s.conf.IdentityPassword))
+		} else {
+			logger.Warn("The identity file path has been passed but is not available. Falling back to ssh-agent, the default authentication method.")
+			sshAuthProvider = helper.NewAuthProvider()
+		}
+	}
+
 	for _, dep := range protodep.Dependencies {
-		gitrepo := repository.NewGitRepository(protodepDir, dep, s.authProvider)
+		var authProvider helper.AuthProvider
+
+		if s.conf.UseHttps {
+			authProvider = httpsAuthProvider
+		} else {
+			switch dep.Agent {
+			case "https":
+				authProvider = httpsAuthProvider
+			case "ssh":
+			case "":
+				authProvider = sshAuthProvider
+			default:
+				return fmt.Errorf("%s agent is not accepted (ssh or https only)", dep.Agent)
+			}
+		}
+
+		gitrepo := repository.NewGitRepository(protodepDir, dep, authProvider)
 
 		repo, err := gitrepo.Open()
 		if err != nil {
