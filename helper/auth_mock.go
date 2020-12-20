@@ -7,8 +7,8 @@ package helper
 import (
 	reflect "reflect"
 
+	transport "github.com/go-git/go-git/v5/plumbing/transport"
 	gomock "github.com/golang/mock/gomock"
-	transport "gopkg.in/src-d/go-git.v4/plumbing/transport"
 )
 
 // MockAuthProvider is a mock of AuthProvider interface
