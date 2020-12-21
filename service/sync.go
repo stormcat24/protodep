@@ -21,25 +21,34 @@ type protoResource struct {
 
 type Sync interface {
 	Resolve(forceUpdate bool, cleanupCache bool) error
+
+	SetHttpsAuthProvider(provider helper.AuthProvider)
+	SetSshAuthProvider(provider helper.AuthProvider)
 }
 
 type SyncImpl struct {
-	conf *helper.AuthProviderConfig
-	targetDir     string
-	outputRootDir string
+	conf *helper.SyncConfig
+
+	httpsProvider helper.AuthProvider
+	sshProvider   helper.AuthProvider
 }
 
-func NewSync(conf *helper.AuthProviderConfig, targetDir string, outputRootDir string) Sync {
-	return &SyncImpl{
+func NewSync(conf *helper.SyncConfig) (Sync, error) {
+	s := &SyncImpl{
 		conf: conf,
-		targetDir:     targetDir,
-		outputRootDir: outputRootDir,
 	}
+
+	err := s.initAuthProviders()
+	if err != nil {
+		return nil, err
+	}
+
+	return s, nil
 }
 
 func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 
-	dep := dependency.NewDependency(s.targetDir, forceUpdate)
+	dep := dependency.NewDependency(s.conf.TargetDir, forceUpdate)
 	protodep, err := dep.Load()
 	if err != nil {
 		return err
@@ -64,42 +73,22 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 		}
 	}
 
-	outdir := filepath.Join(s.outputRootDir, protodep.ProtoOutdir)
+	outdir := filepath.Join(s.conf.OutputDir, protodep.ProtoOutdir)
 	if err := os.RemoveAll(outdir); err != nil {
 		return err
-	}
-
-	httpsAuthProvider := helper.NewAuthProvider(helper.WithHTTPS(s.conf.BasicAuthUsername, s.conf.BasicAuthPassword))
-
-	var sshAuthProvider helper.AuthProvider
-	if s.conf.IdentityFile == "" && s.conf.IdentityPassword == "" {
-		sshAuthProvider = helper.NewAuthProvider()
-	} else {
-		identifyPath := filepath.Join(s.conf.HomeDir, ".ssh", s.conf.IdentityFile)
-		isSSH, err := helper.IsAvailableSSH(identifyPath)
-		if err != nil {
-			return err
-		}
-		if isSSH {
-			sshAuthProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, s.conf.IdentityPassword))
-		} else {
-			logger.Warn("The identity file path has been passed but is not available. Falling back to ssh-agent, the default authentication method.")
-			sshAuthProvider = helper.NewAuthProvider()
-		}
 	}
 
 	for _, dep := range protodep.Dependencies {
 		var authProvider helper.AuthProvider
 
 		if s.conf.UseHttps {
-			authProvider = httpsAuthProvider
+			authProvider = s.httpsProvider
 		} else {
 			switch dep.Agent {
 			case "https":
-				authProvider = httpsAuthProvider
-			case "ssh":
-			case "":
-				authProvider = sshAuthProvider
+				authProvider = s.httpsProvider
+			case "ssh", "":
+				authProvider = s.sshProvider
 			default:
 				return fmt.Errorf("%s agent is not accepted (ssh or https only)", dep.Agent)
 			}
@@ -166,6 +155,39 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 		if err := helper.WriteToml("protodep.lock", newProtodep); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (s *SyncImpl) SetHttpsAuthProvider(provider helper.AuthProvider) {
+	s.httpsProvider = provider
+}
+
+func (s *SyncImpl) SetSshAuthProvider(provider helper.AuthProvider) {
+	s.sshProvider = provider
+}
+
+func (s *SyncImpl) initAuthProviders() error {
+	s.httpsProvider = helper.NewAuthProvider(helper.WithHTTPS(s.conf.BasicAuthUsername, s.conf.BasicAuthPassword))
+
+	if s.conf.IdentityFile == "" && s.conf.IdentityPassword == "" {
+		s.sshProvider = helper.NewAuthProvider()
+
+		return nil
+	}
+
+	identifyPath := filepath.Join(s.conf.HomeDir, ".ssh", s.conf.IdentityFile)
+	isSSH, err := helper.IsAvailableSSH(identifyPath)
+	if err != nil {
+		return err
+	}
+
+	if isSSH {
+		s.sshProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, s.conf.IdentityPassword))
+	} else {
+		logger.Warn("The identity file path has been passed but is not available. Falling back to ssh-agent, the default authentication method.")
+		s.sshProvider = helper.NewAuthProvider()
 	}
 
 	return nil

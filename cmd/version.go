@@ -17,7 +17,7 @@ const art = `
     \|__|     \|__|\|__|\|_______|    \|__|  \|_______|\|_______|\|_______|\|__|`
 
 var versionCmd = &cobra.Command{
-	Use: "version",
+	Use:   "version",
 	Short: "Show protodep version",
 	RunE: func(cdm *cobra.Command, args []string) error {
 		fmt.Println(art)

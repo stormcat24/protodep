@@ -21,14 +21,6 @@ func TestSync(t *testing.T) {
 	err = os.RemoveAll(dotProtoDir)
 	require.NoError(t, err)
 
-	c := gomock.NewController(t)
-	defer c.Finish()
-
-	authProviderMock := helper.NewMockAuthProvider(c)
-	authProviderMock.EXPECT().AuthMethod().Return(nil, nil).AnyTimes()
-	authProviderMock.EXPECT().GetRepositoryURL("github.com/protocolbuffers/protobuf").Return("https://github.com/protocolbuffers/protobuf.git")
-	authProviderMock.EXPECT().GetRepositoryURL("github.com/opensaasstudio/plasma").Return("https://github.com/opensaasstudio/plasma.git")
-
 	pwd, err := os.Getwd()
 	fmt.Println(pwd)
 
@@ -36,7 +28,29 @@ func TestSync(t *testing.T) {
 
 	outputRootDir := os.TempDir()
 
-	target := NewSync(authProviderMock, dotProtoDir, pwd, outputRootDir)
+	conf := helper.SyncConfig{
+		HomeDir:   dotProtoDir,
+		TargetDir: pwd,
+		OutputDir: outputRootDir,
+	}
+
+	target, err := NewSync(&conf)
+	require.NoError(t, err)
+
+	c := gomock.NewController(t)
+	defer c.Finish()
+
+	httpsAuthProviderMock := helper.NewMockAuthProvider(c)
+	httpsAuthProviderMock.EXPECT().AuthMethod().Return(nil, nil).AnyTimes()
+	httpsAuthProviderMock.EXPECT().GetRepositoryURL("github.com/protocolbuffers/protobuf").Return("https://github.com/protocolbuffers/protobuf.git")
+
+	sshAuthProviderMock := helper.NewMockAuthProvider(c)
+	sshAuthProviderMock.EXPECT().AuthMethod().Return(nil, nil).AnyTimes()
+	sshAuthProviderMock.EXPECT().GetRepositoryURL("github.com/opensaasstudio/plasma").Return("https://github.com/opensaasstudio/plasma.git")
+
+	target.SetHttpsAuthProvider(httpsAuthProviderMock)
+	target.SetSshAuthProvider(sshAuthProviderMock)
+
 	// clone
 	err = target.Resolve(false, false)
 	require.NoError(t, err)

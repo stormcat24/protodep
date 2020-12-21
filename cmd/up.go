@@ -11,16 +11,6 @@ import (
 	"github.com/stormcat24/protodep/service"
 )
 
-var (
-	authProvider helper.AuthProvider
-)
-
-type protoResource struct {
-	source       string
-	relativeDest string
-}
-
-
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "Populate .proto vendors existing protodep.toml and lock",
@@ -84,16 +74,22 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		conf := helper.AuthProviderConfig{
+		conf := helper.SyncConfig{
 			UseHttps:          useHttps,
+			HomeDir:           homeDir,
+			TargetDir:         pwd,
+			OutputDir:         pwd,
 			BasicAuthUsername: basicAuthUsername,
 			BasicAuthPassword: basicAuthPassword,
-			HomeDir:           homeDir,
 			IdentityFile:      identityFile,
 			IdentityPassword:  password,
 		}
 
-		updateService := service.NewSync(&conf, pwd, pwd)
+		updateService, err := service.NewSync(&conf)
+		if err != nil {
+			return err
+		}
+
 		return updateService.Resolve(isForceUpdate, isCleanupCache)
 	},
 }
