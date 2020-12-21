@@ -84,13 +84,13 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 		if s.conf.UseHttps {
 			authProvider = s.httpsProvider
 		} else {
-			switch dep.Agent {
+			switch dep.Protocol {
 			case "https":
 				authProvider = s.httpsProvider
 			case "ssh", "":
 				authProvider = s.sshProvider
 			default:
-				return fmt.Errorf("%s agent is not accepted (ssh or https only)", dep.Agent)
+				return fmt.Errorf("%s protocol is not accepted (ssh or https only)", dep.Protocol)
 			}
 		}
 
@@ -142,7 +142,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 			Revision: repo.Hash,
 			Path:     repo.Dep.Path,
 			Ignores:  repo.Dep.Ignores,
-			Agent:    repo.Dep.Agent,
+			Protocol: repo.Dep.Protocol,
 		})
 	}
 

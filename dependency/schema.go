@@ -15,7 +15,7 @@ type ProtoDepDependency struct {
 	Branch   string   `toml:"branch"`
 	Path     string   `toml:"path"`
 	Ignores  []string `toml:"ignores"`
-	Agent    string   `toml:"agent"`
+	Protocol string   `toml:"protocol"`
 }
 
 func (d *ProtoDepDependency) Repository() string {
