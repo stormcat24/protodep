@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
@@ -11,15 +10,6 @@ import (
 	"github.com/stormcat24/protodep/logger"
 	"github.com/stormcat24/protodep/service"
 )
-
-var (
-	authProvider helper.AuthProvider
-)
-
-type protoResource struct {
-	source       string
-	relativeDest string
-}
 
 var upCmd = &cobra.Command{
 	Use:   "up",
@@ -84,27 +74,22 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		if useHttps {
-			authProvider = helper.NewAuthProvider(helper.WithHTTPS(basicAuthUsername, basicAuthPassword))
-		} else {
-			if identityFile == "" && password == "" {
-				authProvider = helper.NewAuthProvider()
-			} else {
-				identifyPath := filepath.Join(homeDir, ".ssh", identityFile)
-				isSSH, err := helper.IsAvailableSSH(identifyPath)
-				if err != nil {
-					return err
-				}
-				if isSSH {
-					authProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, password))
-				} else {
-					logger.Warn("The identity file path has been passed but is not available. Falling back to ssh-agent, the default authentication method.")
-					authProvider = helper.NewAuthProvider()
-				}
-			}
+		conf := helper.SyncConfig{
+			UseHttps:          useHttps,
+			HomeDir:           homeDir,
+			TargetDir:         pwd,
+			OutputDir:         pwd,
+			BasicAuthUsername: basicAuthUsername,
+			BasicAuthPassword: basicAuthPassword,
+			IdentityFile:      identityFile,
+			IdentityPassword:  password,
 		}
 
-		updateService := service.NewSync(authProvider, homeDir, pwd, pwd)
+		updateService, err := service.NewSync(&conf)
+		if err != nil {
+			return err
+		}
+
 		return updateService.Resolve(isForceUpdate, isCleanupCache)
 	},
 }

@@ -8,8 +8,10 @@ proto_outdir = "./proto"
   target = "github.com/grpc-ecosystem/grpc-gateway/examples/examplepb"
   revision = "v1.2.2"
   path = "grpc-gateway/examplepb"
+  protocol = "ssh"
 
 [[dependencies]]
   target = "github.com/kubernetes/helm/_proto/hapi"
   revision = "v2.8.1"
   ignores = ["./release", "./rudder", "./services", "./version"]
+  protocol = "https"

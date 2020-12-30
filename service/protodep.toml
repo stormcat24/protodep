@@ -3,8 +3,10 @@ proto_outdir = "./proto"
 [[dependencies]]
   target = "github.com/opensaasstudio/plasma/protobuf"
   branch = "master"
+  protocol = "ssh"
 
 [[dependencies]]
   target = "github.com/protocolbuffers/protobuf/src"
   branch = "master"
   ignores = ["/google/protobuf/test_messages_proto3", "**/util/**/testdata/**", "**/protobuf/test_messages_proto2.proto"]
+  protocol = "https"
