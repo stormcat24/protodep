@@ -113,24 +113,26 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 			return nil, errors.Wrapf(err, "set head to %s is failed", branch)
 		}
 	} else {
-		hash := plumbing.NewHash(revision)
-		if err := wt.Checkout(&git.CheckoutOptions{Hash: hash}); err != nil {
-			return nil, errors.Wrapf(err, "checkout to %s is failed", revision)
-		}
+		var opts git.CheckoutOptions
 
 		tag := plumbing.NewTagReferenceName(revision)
-		ref, err := rep.Reference(tag, false)
+		_, err := rep.Reference(tag, false)
 		if err != nil && err != plumbing.ErrReferenceNotFound {
 			return nil, errors.Wrapf(err, "tag = %s", tag)
+		} else {
+			if err != nil {
+				// Tag not found, revision must be a hash
+				logger.Info("%s is not a tag, checking out by hash", revision)
+				hash := plumbing.NewHash(revision)
+				opts = git.CheckoutOptions{Hash: hash}
+			} else {
+				logger.Info("%s is a tag, checking out by tag", revision)
+				opts = git.CheckoutOptions{Branch: tag}
+			}
 		}
 
-		if ref != nil {
-			hash = ref.Hash()
-		}
-
-		head := plumbing.NewHashReference(plumbing.HEAD, hash)
-		if err := rep.Storer.SetReference(head); err != nil {
-			return nil, errors.Wrapf(err, "set head to %s is failed", revision)
+		if err := wt.Checkout(&opts); err != nil {
+			return nil, errors.Wrapf(err, "checkout to %s is failed", revision)
 		}
 	}
 
