@@ -99,7 +99,7 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 	}
 
 	if revision == "" {
-		target, err := rep.Storer.Reference(plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)))
+		target, err := r.resolveReference(rep, branch)
 		if err != nil {
 			return nil, errors.Wrapf(err, "change branch to %s is failed", branch)
 		}
@@ -155,4 +155,23 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 
 func (r *GitHubRepository) ProtoRootDir() string {
 	return filepath.Join(r.protodepDir, r.dep.Target)
+}
+
+func (r *GitHubRepository) resolveReference(rep *git.Repository, branch string) (*plumbing.Reference, error) {
+	if branch != "master" {
+		return r.getReference(rep, branch)
+	}
+	// If master branch is failed, try main branch.
+	target, err := r.getReference(rep, branch)
+	if err == plumbing.ErrReferenceNotFound {
+		return r.getReference(rep, "main")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return target, nil
+}
+
+func (r *GitHubRepository) getReference(rep *git.Repository, branch string) (*plumbing.Reference, error) {
+	return rep.Storer.Reference(plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)))
 }
