@@ -11,6 +11,7 @@ type ProtoDep struct {
 
 type ProtoDepDependency struct {
 	Target   string   `toml:"target"`
+	Subgroup string   `toml:"subgroup"`
 	Revision string   `toml:"revision"`
 	Branch   string   `toml:"branch"`
 	Path     string   `toml:"path"`
@@ -20,8 +21,10 @@ type ProtoDepDependency struct {
 
 func (d *ProtoDepDependency) Repository() string {
 	tokens := strings.Split(d.Target, "/")
-	if len(tokens) > 3 {
-		return strings.Join(tokens[0:3], "/")
+	subgroupTokens := strings.Split(d.Subgroup, "/")
+	repoTokens := 3 + len(subgroupTokens)
+	if len(tokens) > repoTokens {
+		return strings.Join(tokens[0:repoTokens], "/")
 	} else {
 		return d.Target
 	}
