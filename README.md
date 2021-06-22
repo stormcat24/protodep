@@ -1,7 +1,6 @@
 protodep
 =======
 
-[![Circle CI](https://circleci.com/gh/stormcat24/protodep.svg?style=shield&circle-token=f53432c65ac4fd4bd4b8b778892690e4032ea141)](https://circleci.com/gh/stormcat24/protodep)
 [![Language](https://img.shields.io/badge/language-go-brightgreen.svg?style=flat)](https://golang.org/)
 [![issues](https://img.shields.io/github/issues/stormcat24/protodep.svg?style=flat)](https://github.com/stormcat24/protodep/issues?state=open)
 [![License: MIT](https://img.shields.io/badge/license-MIT-orange.svg)](LICENSE)
