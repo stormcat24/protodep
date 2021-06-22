@@ -1,0 +1,78 @@
+name: build protodep 
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  GO_VERSION: 1.16.5
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: set golang environment variables
+        run: |
+          echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
+          echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
+      - name: cache modules
+        uses: actions/cache@v2
+        with:
+          path: ${GOMODCACHE}
+          key: ${{ runner.os }}-modules-${{ hashFiles('go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-modules-${{ hashFiles('go.sum') }}
+            ${{ runner.os }}-modules-
+      - name: download dependencies
+        run: go mod download
+      - name: cache vendor
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-vendor-
+      - run: make vendor 
+
+  test:
+    needs: setup 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: cache vendor
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-vendor-
+      - run: make test
+
+  build:
+    needs: test 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-go@v2
+        with:
+          go-version: ${{ env.GO_VERSION }}
+      - name: cache vendor
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
+            ${{ runner.os }}-vendor-
+      - run: make build
