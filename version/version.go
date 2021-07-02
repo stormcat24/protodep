@@ -1,12 +1,19 @@
 package version
 
-import "fmt"
+import (
+	"fmt"
+	"runtime/debug"
+)
+
+const (
+	unspecified = "unspecified"
+)
 
 var (
-	gitCommit     = "unspecified"
-	gitCommitFull = "unspecified"
-	buildDate     = "unspecified"
-	version       = "unspecified"
+	gitCommit     = unspecified
+	gitCommitFull = unspecified
+	buildDate     = unspecified
+	version       = unspecified
 )
 
 type Info struct {
@@ -26,6 +33,11 @@ func Get() Info {
 }
 
 func (i Info) String() string {
+	if i.Version == unspecified {
+		info, _ := debug.ReadBuildInfo()
+		return fmt.Sprintf(`{"Version": "%s"}`, info.Main.Version)
+	}
+
 	return fmt.Sprintf(
 		`{"Version": "%s", "GitCommit": "%s", "GitCommitFull": "%s", "BuildDate": "%s"}`,
 		i.Version,
