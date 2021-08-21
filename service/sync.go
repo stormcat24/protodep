@@ -143,6 +143,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 			Path:     repo.Dep.Path,
 			Ignores:  repo.Dep.Ignores,
 			Protocol: repo.Dep.Protocol,
+			Subgroup: repo.Dep.Subgroup,
 		})
 	}
 
