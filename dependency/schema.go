@@ -21,7 +21,10 @@ type ProtoDepDependency struct {
 
 func (d *ProtoDepDependency) Repository() string {
 	tokens := strings.Split(d.Target, "/")
-	subgroupTokens := strings.Split(d.Subgroup, "/")
+	subgroupTokens := make([]string, 0)
+	if d.Subgroup != "" {
+		subgroupTokens = strings.Split(d.Subgroup, "/")
+	}
 	repoTokens := 3 + len(subgroupTokens)
 	if len(tokens) > repoTokens {
 		return strings.Join(tokens[0:repoTokens], "/")
