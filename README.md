@@ -18,10 +18,10 @@ If you manage proto files in a git repository, what will you do? Most remote ser
 
 ## Install
 
-### go get
+### go install
 
 ```bash
-$ go get github.com/stormcat24/protodep
+$ go get github.com/stormcat24/protodep@latest
 ```
 
 ### from binary
