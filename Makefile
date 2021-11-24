@@ -42,6 +42,7 @@ build-all: tidy vendor
 		$(call build-artifact,linux,arm,$(APP))
 		$(call build-artifact,linux,arm64,$(APP))
 		$(call build-artifact,darwin,amd64,$(APP))
+		$(call build-artifact,darwin,arm64,$(APP))
 		$(call build-artifact,windows,amd64,$(APP).exe)
 
 .PHONY: clean
