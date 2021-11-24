@@ -5,12 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/pkg/errors"
+
 	"github.com/stormcat24/protodep/dependency"
 	"github.com/stormcat24/protodep/helper"
 	"github.com/stormcat24/protodep/logger"
-	"gopkg.in/src-d/go-git.v4"
-	"gopkg.in/src-d/go-git.v4/plumbing"
 )
 
 type GitRepository interface {
