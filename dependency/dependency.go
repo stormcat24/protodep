@@ -48,6 +48,11 @@ func (d *DependencyImpl) Load() (*ProtoDep, error) {
 	if _, err := toml.Decode(string(content), &conf); err != nil {
 		return nil, errors.Wrap(err, "decode toml is failed")
 	}
+
+	if err := conf.Validate(); err != nil {
+		return nil, errors.Wrap(err, "found invalid configuration")
+	}
+
 	return &conf, nil
 }
 

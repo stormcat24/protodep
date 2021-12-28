@@ -2,11 +2,20 @@ package dependency
 
 import (
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 type ProtoDep struct {
 	ProtoOutdir  string               `toml:"proto_outdir"`
 	Dependencies []ProtoDepDependency `toml:"dependencies"`
+}
+
+func (d *ProtoDep) Validate() error {
+	if strings.TrimSpace(d.ProtoOutdir) == "" {
+		return errors.New("'proto_outdir' is required")
+	}
+	return nil
 }
 
 type ProtoDepDependency struct {
