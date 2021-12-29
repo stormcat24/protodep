@@ -2,7 +2,6 @@ package resolver
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -139,13 +138,13 @@ func TestWriteFileWithDirectory(t *testing.T) {
 	require.NoError(t, err)
 	require.True(t, !stat.IsDir())
 
-	data, err := ioutil.ReadFile(testFile)
+	data, err := os.ReadFile(testFile)
 	require.NoError(t, err)
 	require.Equal(t, string(data), "test")
 }
 
 func TestIsAvailableSSH(t *testing.T) {
-	f, err := ioutil.TempFile("", "id_rsa")
+	f, err := os.CreateTemp("", "id_rsa")
 	require.NoError(t, err)
 
 	found, err := isAvailableSSH(f.Name())

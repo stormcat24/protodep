@@ -3,14 +3,13 @@ package resolver
 import (
 	"bytes"
 	"fmt"
-	"github.com/BurntSushi/toml"
-	"github.com/pkg/errors"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/BurntSushi/toml"
 	"github.com/gobwas/glob"
+	"github.com/pkg/errors"
 
 	"github.com/stormcat24/protodep/pkg/auth"
 	"github.com/stormcat24/protodep/pkg/config"
@@ -63,7 +62,7 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 
 	_, err = os.Stat(protodepDir)
 	if cleanupCache && err == nil {
-		files, err := ioutil.ReadDir(protodepDir)
+		files, err := os.ReadDir(protodepDir)
 		if err != nil {
 			return err
 		}
@@ -130,7 +129,7 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 		for _, s := range sources {
 			outpath := filepath.Join(outdir, dep.Path, s.relativeDest)
 
-			content, err := ioutil.ReadFile(s.source)
+			content, err := os.ReadFile(s.source)
 			if err != nil {
 				return err
 			}
@@ -237,7 +236,7 @@ func writeToml(dest string, input interface{}) error {
 		return errors.Wrapf(err, "encode config to toml format is failed. [%+v]", input)
 	}
 
-	if err := ioutil.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
 		return errors.Wrapf(err, "write to %s is failed", dest)
 	}
 
@@ -263,7 +262,7 @@ func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 		return errors.Wrapf(err, "create directory is failed. [%s]", dir)
 	}
 
-	if err := ioutil.WriteFile(path, data, perm); err != nil {
+	if err := os.WriteFile(path, data, perm); err != nil {
 		return errors.Wrapf(err, "write data to file is failed. [%s]", path)
 	}
 
