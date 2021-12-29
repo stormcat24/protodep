@@ -7,7 +7,7 @@ on:
   pull_request:
 
 env:
-  GO_VERSION: 1.16.10
+  GO_VERSION: 1.17.5
 
 jobs:
   setup:
