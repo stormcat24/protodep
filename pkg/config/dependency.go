@@ -1,7 +1,6 @@
 package config
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -39,7 +38,7 @@ func (d *DependencyImpl) Load() (*ProtoDep, error) {
 		targetConfig = d.lockpath
 	}
 
-	content, err := ioutil.ReadFile(targetConfig)
+	content, err := os.ReadFile(targetConfig)
 	if err != nil {
 		return nil, errors.Wrapf(err, "load %s is failed", targetConfig)
 	}
