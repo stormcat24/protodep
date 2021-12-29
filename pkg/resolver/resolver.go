@@ -1,17 +1,21 @@
-package service
+package resolver
 
 import (
+	"bytes"
 	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobwas/glob"
-	"github.com/stormcat24/protodep/dependency"
-	"github.com/stormcat24/protodep/helper"
-	"github.com/stormcat24/protodep/logger"
-	"github.com/stormcat24/protodep/repository"
+
+	"github.com/stormcat24/protodep/pkg/auth"
+	"github.com/stormcat24/protodep/pkg/config"
+	"github.com/stormcat24/protodep/pkg/logger"
+	"github.com/stormcat24/protodep/pkg/repository"
 )
 
 type protoResource struct {
@@ -19,22 +23,22 @@ type protoResource struct {
 	relativeDest string
 }
 
-type Sync interface {
+type Resolver interface {
 	Resolve(forceUpdate bool, cleanupCache bool) error
 
-	SetHttpsAuthProvider(provider helper.AuthProvider)
-	SetSshAuthProvider(provider helper.AuthProvider)
+	SetHttpsAuthProvider(provider auth.AuthProvider)
+	SetSshAuthProvider(provider auth.AuthProvider)
 }
 
-type SyncImpl struct {
-	conf *helper.SyncConfig
+type resolver struct {
+	conf *Config
 
-	httpsProvider helper.AuthProvider
-	sshProvider   helper.AuthProvider
+	httpsProvider auth.AuthProvider
+	sshProvider   auth.AuthProvider
 }
 
-func NewSync(conf *helper.SyncConfig) (Sync, error) {
-	s := &SyncImpl{
+func New(conf *Config) (Resolver, error) {
+	s := &resolver{
 		conf: conf,
 	}
 
@@ -46,15 +50,15 @@ func NewSync(conf *helper.SyncConfig) (Sync, error) {
 	return s, nil
 }
 
-func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
+func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 
-	dep := dependency.NewDependency(s.conf.TargetDir, forceUpdate)
+	dep := config.NewDependency(s.conf.TargetDir, forceUpdate)
 	protodep, err := dep.Load()
 	if err != nil {
 		return err
 	}
 
-	newdeps := make([]dependency.ProtoDepDependency, 0, len(protodep.Dependencies))
+	newdeps := make([]config.ProtoDepDependency, 0, len(protodep.Dependencies))
 	protodepDir := filepath.Join(s.conf.HomeDir, ".protodep")
 
 	_, err = os.Stat(protodepDir)
@@ -79,7 +83,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 	}
 
 	for _, dep := range protodep.Dependencies {
-		var authProvider helper.AuthProvider
+		var authProvider auth.AuthProvider
 
 		if s.conf.UseHttps {
 			authProvider = s.httpsProvider
@@ -94,7 +98,7 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 			}
 		}
 
-		gitrepo := repository.NewGitRepository(protodepDir, dep, authProvider)
+		gitrepo := repository.NewGit(protodepDir, dep, authProvider)
 
 		repo, err := gitrepo.Open()
 		if err != nil {
@@ -131,12 +135,12 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 				return err
 			}
 
-			if err := helper.WriteFileWithDirectory(outpath, content, 0644); err != nil {
+			if err := writeFileWithDirectory(outpath, content, 0644); err != nil {
 				return err
 			}
 		}
 
-		newdeps = append(newdeps, dependency.ProtoDepDependency{
+		newdeps = append(newdeps, config.ProtoDepDependency{
 			Target:   repo.Dep.Target,
 			Branch:   repo.Dep.Branch,
 			Revision: repo.Hash,
@@ -147,13 +151,13 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 		})
 	}
 
-	newProtodep := dependency.ProtoDep{
+	newProtodep := config.ProtoDep{
 		ProtoOutdir:  protodep.ProtoOutdir,
 		Dependencies: newdeps,
 	}
 
 	if dep.IsNeedWriteLockFile() {
-		if err := helper.WriteToml("protodep.lock", newProtodep); err != nil {
+		if err := writeToml("protodep.lock", newProtodep); err != nil {
 			return err
 		}
 	}
@@ -161,34 +165,34 @@ func (s *SyncImpl) Resolve(forceUpdate bool, cleanupCache bool) error {
 	return nil
 }
 
-func (s *SyncImpl) SetHttpsAuthProvider(provider helper.AuthProvider) {
+func (s *resolver) SetHttpsAuthProvider(provider auth.AuthProvider) {
 	s.httpsProvider = provider
 }
 
-func (s *SyncImpl) SetSshAuthProvider(provider helper.AuthProvider) {
+func (s *resolver) SetSshAuthProvider(provider auth.AuthProvider) {
 	s.sshProvider = provider
 }
 
-func (s *SyncImpl) initAuthProviders() error {
-	s.httpsProvider = helper.NewAuthProvider(helper.WithHTTPS(s.conf.BasicAuthUsername, s.conf.BasicAuthPassword))
+func (s *resolver) initAuthProviders() error {
+	s.httpsProvider = auth.NewAuthProvider(auth.WithHTTPS(s.conf.BasicAuthUsername, s.conf.BasicAuthPassword))
 
 	if s.conf.IdentityFile == "" && s.conf.IdentityPassword == "" {
-		s.sshProvider = helper.NewAuthProvider()
+		s.sshProvider = auth.NewAuthProvider()
 
 		return nil
 	}
 
 	identifyPath := filepath.Join(s.conf.HomeDir, ".ssh", s.conf.IdentityFile)
-	isSSH, err := helper.IsAvailableSSH(identifyPath)
+	isSSH, err := isAvailableSSH(identifyPath)
 	if err != nil {
 		return err
 	}
 
 	if isSSH {
-		s.sshProvider = helper.NewAuthProvider(helper.WithPemFile(identifyPath, s.conf.IdentityPassword))
+		s.sshProvider = auth.NewAuthProvider(auth.WithPemFile(identifyPath, s.conf.IdentityPassword))
 	} else {
 		logger.Warn("The identity file path has been passed but is not available. Falling back to ssh-agent, the default authentication method.")
-		s.sshProvider = helper.NewAuthProvider()
+		s.sshProvider = auth.NewAuthProvider()
 	}
 
 	return nil
@@ -204,7 +208,7 @@ func compileIngoresToGlob(ignores []string) []glob.Glob {
 	return globIngores
 }
 
-func (s *SyncImpl) isIgnorePath(protoRootDir string, target string, ignores []string, globIgnores []glob.Glob) bool {
+func (s *resolver) isIgnorePath(protoRootDir string, target string, ignores []string, globIgnores []glob.Glob) bool {
 	// convert slashes otherwise doesnt work on windows same was as on linux
 	target = filepath.ToSlash(target)
 
@@ -225,3 +229,57 @@ func (s *SyncImpl) isIgnorePath(protoRootDir string, target string, ignores []st
 
 	return false
 }
+
+func writeToml(dest string, input interface{}) error {
+	var buffer bytes.Buffer
+	encoder := toml.NewEncoder(&buffer)
+	if err := encoder.Encode(input); err != nil {
+		return errors.Wrapf(err, "encode config to toml format is failed. [%+v]", input)
+	}
+
+	if err := ioutil.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
+		return errors.Wrapf(err, "write to %s is failed", dest)
+	}
+
+	return nil
+}
+
+func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
+
+	path = filepath.ToSlash(path)
+	s := strings.Split(path, "/")
+
+	var dir string
+	if len(s) > 1 {
+		dir = strings.Join(s[0:len(s)-1], "/")
+	} else {
+		dir = path
+	}
+
+	dir = filepath.FromSlash(dir)
+	path = filepath.FromSlash(path)
+
+	if err := os.MkdirAll(dir, 0777); err != nil {
+		return errors.Wrapf(err, "create directory is failed. [%s]", dir)
+	}
+
+	if err := ioutil.WriteFile(path, data, perm); err != nil {
+		return errors.Wrapf(err, "write data to file is failed. [%s]", path)
+	}
+
+	return nil
+}
+
+// isAvailableSSH is Check whether this machine can use git protocol
+func isAvailableSSH(identifyPath string) (bool, error) {
+	if _, err := os.Stat(identifyPath); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+		return false, err
+	}
+
+	// TODO: validate ssh key
+	return true, nil
+}
+

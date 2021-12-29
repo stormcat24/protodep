@@ -2,7 +2,7 @@
 // Source: auth.go
 
 // Package helper is a generated GoMock package.
-package helper
+package auth
 
 import (
 	reflect "reflect"

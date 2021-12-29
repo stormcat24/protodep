@@ -1,4 +1,4 @@
-package helper
+package auth
 
 import (
 	"fmt"
@@ -17,8 +17,8 @@ const (
 )
 
 type authOptions struct {
-	method   authMethod
-	pemFile  string
+	method  authMethod
+	pemFile string
 	username string
 	password string
 }
