@@ -9,24 +9,24 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/pkg/errors"
 
-	"github.com/stormcat24/protodep/dependency"
-	"github.com/stormcat24/protodep/helper"
-	"github.com/stormcat24/protodep/logger"
+	"github.com/stormcat24/protodep/pkg/auth"
+	"github.com/stormcat24/protodep/pkg/config"
+	"github.com/stormcat24/protodep/pkg/logger"
 )
 
-type GitRepository interface {
+type Git interface {
 	Open() (*OpenedRepository, error)
 	ProtoRootDir() string
 }
 
-type GitHubRepository struct {
+type github struct {
 	protodepDir  string
-	dep          dependency.ProtoDepDependency
-	authProvider helper.AuthProvider
+	dep          config.ProtoDepDependency
+	authProvider auth.AuthProvider
 }
 
-func NewGitRepository(protodepDir string, dep dependency.ProtoDepDependency, authProvider helper.AuthProvider) GitRepository {
-	return &GitHubRepository{
+func NewGit(protodepDir string, dep config.ProtoDepDependency, authProvider auth.AuthProvider) Git {
+	return &github{
 		protodepDir:  protodepDir,
 		dep:          dep,
 		authProvider: authProvider,
@@ -35,11 +35,11 @@ func NewGitRepository(protodepDir string, dep dependency.ProtoDepDependency, aut
 
 type OpenedRepository struct {
 	Repository *git.Repository
-	Dep        dependency.ProtoDepDependency
+	Dep        config.ProtoDepDependency
 	Hash       string
 }
 
-func (r *GitHubRepository) Open() (*OpenedRepository, error) {
+func (r *github) Open() (*OpenedRepository, error) {
 
 	branch := "master"
 	if r.dep.Branch != "" {
@@ -154,11 +154,11 @@ func (r *GitHubRepository) Open() (*OpenedRepository, error) {
 	}, nil
 }
 
-func (r *GitHubRepository) ProtoRootDir() string {
+func (r *github) ProtoRootDir() string {
 	return filepath.Join(r.protodepDir, r.dep.Target)
 }
 
-func (r *GitHubRepository) resolveReference(rep *git.Repository, branch string) (*plumbing.Reference, error) {
+func (r *github) resolveReference(rep *git.Repository, branch string) (*plumbing.Reference, error) {
 	if branch != "master" {
 		return r.getReference(rep, branch)
 	}
@@ -173,6 +173,6 @@ func (r *GitHubRepository) resolveReference(rep *git.Repository, branch string) 
 	return target, nil
 }
 
-func (r *GitHubRepository) getReference(rep *git.Repository, branch string) (*plumbing.Reference, error) {
+func (r *github) getReference(rep *git.Repository, branch string) (*plumbing.Reference, error) {
 	return rep.Storer.Reference(plumbing.ReferenceName(fmt.Sprintf("refs/remotes/origin/%s", branch)))
 }

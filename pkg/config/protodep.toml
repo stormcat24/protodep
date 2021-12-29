@@ -1,0 +1,11 @@
+proto_outdir = "./proto"
+
+[[dependencies]]
+  target = "github.com/protocolbuffers/protobuf/src"
+  branch = "master"
+
+[[dependencies]]
+  target = "github.com/grpc-ecosystem/grpc-gateway/examples/internal/helloworld"
+  revision = "v2.7.2"
+  path = "grpc-gateway/examples/internal/helloworld"
+  protocol = "ssh"

@@ -1,6 +1,6 @@
-package helper
+package resolver
 
-type SyncConfig struct {
+type Config struct {
 	// UseHttps will force https on each proto dependencies fetch.
 	UseHttps bool
 

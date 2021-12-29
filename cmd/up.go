@@ -6,9 +6,9 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
-	"github.com/stormcat24/protodep/helper"
-	"github.com/stormcat24/protodep/logger"
-	"github.com/stormcat24/protodep/service"
+
+	"github.com/stormcat24/protodep/pkg/logger"
+	"github.com/stormcat24/protodep/pkg/resolver"
 )
 
 var upCmd = &cobra.Command{
@@ -74,7 +74,7 @@ var upCmd = &cobra.Command{
 			return err
 		}
 
-		conf := helper.SyncConfig{
+		conf := resolver.Config{
 			UseHttps:          useHttps,
 			HomeDir:           homeDir,
 			TargetDir:         pwd,
@@ -85,7 +85,7 @@ var upCmd = &cobra.Command{
 			IdentityPassword:  password,
 		}
 
-		updateService, err := service.NewSync(&conf)
+		updateService, err := resolver.New(&conf)
 		if err != nil {
 			return err
 		}
