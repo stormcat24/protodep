@@ -25,7 +25,7 @@ If you manage proto files in a git repository, what will you do? Most remote ser
 ### go install
 
 ```bash
-$ go get github.com/stormcat24/protodep@latest
+$ go install -v github.com/stormcat24/protodep@v0.1.6
 ```
 
 ### from binary
@@ -33,6 +33,7 @@ $ go get github.com/stormcat24/protodep@latest
 Support as follows:
 
 * protodep_darwin_amd64.tar.gz
+* protodep_darwin_arm64.tar.gz
 * protodep_linux_386.tar.gz
 * protodep_linux_amd64.tar.gz
 * protodep_linux_arm.tar.gz
