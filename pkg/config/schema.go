@@ -1,9 +1,8 @@
 package config
 
 import (
+	"errors"
 	"strings"
-
-	"github.com/pkg/errors"
 )
 
 type ProtoDep struct {
@@ -13,7 +12,7 @@ type ProtoDep struct {
 
 func (d *ProtoDep) Validate() error {
 	if strings.TrimSpace(d.ProtoOutdir) == "" {
-		return errors.New("'proto_outdir' is required")
+		return errors.New("required 'proto_outdir'")
 	}
 	return nil
 }

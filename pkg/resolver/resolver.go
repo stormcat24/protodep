@@ -9,8 +9,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/gobwas/glob"
-	"github.com/pkg/errors"
-
 	"github.com/stormcat24/protodep/pkg/auth"
 	"github.com/stormcat24/protodep/pkg/config"
 	"github.com/stormcat24/protodep/pkg/logger"
@@ -233,11 +231,11 @@ func writeToml(dest string, input interface{}) error {
 	var buffer bytes.Buffer
 	encoder := toml.NewEncoder(&buffer)
 	if err := encoder.Encode(input); err != nil {
-		return errors.Wrapf(err, "encode config to toml format is failed. [%+v]", input)
+		return fmt.Errorf( "encode config to toml format: %w", err)
 	}
 
 	if err := os.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
-		return errors.Wrapf(err, "write to %s is failed", dest)
+		return fmt.Errorf( "write to %s: %w", dest, err)
 	}
 
 	return nil
@@ -259,11 +257,11 @@ func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 	path = filepath.FromSlash(path)
 
 	if err := os.MkdirAll(dir, 0777); err != nil {
-		return errors.Wrapf(err, "create directory is failed. [%s]", dir)
+		return fmt.Errorf( "create directory %s: %w", dir, err)
 	}
 
 	if err := os.WriteFile(path, data, perm); err != nil {
-		return errors.Wrapf(err, "write data to file is failed. [%s]", path)
+		return fmt.Errorf( "write data to %s: %w", path, err)
 	}
 
 	return nil
