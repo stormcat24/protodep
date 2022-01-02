@@ -117,8 +117,6 @@ $ protodep up --use-https \
     --basic-auth-password=your-github-password
 ```
 
-License
-===
-See [LICENSE](LICENSE).
+### License
 
-Copyright © stromcat24. All Rights Reserved.
+Apache License 2.0, see [LICENSE](https://github.com/stormcat24/protodep/blob/master/LICENSE).
