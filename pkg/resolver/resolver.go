@@ -104,7 +104,7 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 
 		sources := make([]protoResource, 0)
 
-		compiledIgnores := compileIngoresToGlob(dep.Ignores)
+		compiledIgnores := compileIgnoreToGlob(dep.Ignores)
 
 		protoRootDir := gitrepo.ProtoRootDir()
 		filepath.Walk(protoRootDir, func(path string, info os.FileInfo, err error) error {
@@ -195,14 +195,14 @@ func (s *resolver) initAuthProviders() error {
 	return nil
 }
 
-func compileIngoresToGlob(ignores []string) []glob.Glob {
-	globIngores := make([]glob.Glob, len(ignores))
+func compileIgnoreToGlob(ignores []string) []glob.Glob {
+	globIgnores := make([]glob.Glob, len(ignores))
 
 	for idx, ignore := range ignores {
-		globIngores[idx] = glob.MustCompile(ignore)
+		globIgnores[idx] = glob.MustCompile(ignore)
 	}
 
-	return globIngores
+	return globIgnores
 }
 
 func (s *resolver) isIgnorePath(protoRootDir string, target string, ignores []string, globIgnores []glob.Glob) bool {
