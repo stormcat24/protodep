@@ -105,6 +105,9 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 		sources := make([]protoResource, 0)
 
 		compiledIgnores := compileIgnoreToGlob(dep.Ignores)
+		compiledIncludes := compileIgnoreToGlob(dep.Includes)
+
+		hasIncludes := len(dep.Includes) > 0
 
 		protoRootDir := gitrepo.ProtoRootDir()
 		filepath.Walk(protoRootDir, func(path string, info os.FileInfo, err error) error {
@@ -112,7 +115,12 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 				return err
 			}
 			if strings.HasSuffix(path, ".proto") {
-				if s.isIgnorePath(protoRootDir, path, dep.Ignores, compiledIgnores) {
+				isIncludePath := s.isMatchPath(protoRootDir, path, dep.Includes, compiledIncludes)
+				isIgnorePath := s.isMatchPath(protoRootDir, path, dep.Ignores, compiledIgnores)
+
+				if hasIncludes && !isIncludePath {
+					logger.Info("skipped %s due to include setting", path)
+				} else if isIgnorePath {
 					logger.Info("skipped %s due to ignore setting", path)
 				} else {
 					sources = append(sources, protoResource{
@@ -205,21 +213,21 @@ func compileIgnoreToGlob(ignores []string) []glob.Glob {
 	return globIgnores
 }
 
-func (s *resolver) isIgnorePath(protoRootDir string, target string, ignores []string, globIgnores []glob.Glob) bool {
+func (s *resolver) isMatchPath(protoRootDir string, target string, paths []string, globMatch []glob.Glob) bool {
 	// convert slashes otherwise doesnt work on windows same was as on linux
 	target = filepath.ToSlash(target)
 
 	// keeping old logic for backward compatibility
-	for _, ignore := range ignores {
+	for _, pathToMatch := range paths {
 		// support windows paths correctly
-		pathPrefix := filepath.ToSlash(filepath.Join(protoRootDir, ignore))
+		pathPrefix := filepath.ToSlash(filepath.Join(protoRootDir, pathToMatch))
 		if strings.HasPrefix(target, pathPrefix) {
 			return true
 		}
 	}
 
-	for _, ignore := range globIgnores {
-		if ignore.Match(target) {
+	for _, pathToMatch := range globMatch {
+		if pathToMatch.Match(target) {
 			return true
 		}
 	}
@@ -231,11 +239,11 @@ func writeToml(dest string, input interface{}) error {
 	var buffer bytes.Buffer
 	encoder := toml.NewEncoder(&buffer)
 	if err := encoder.Encode(input); err != nil {
-		return fmt.Errorf( "encode config to toml format: %w", err)
+		return fmt.Errorf("encode config to toml format: %w", err)
 	}
 
 	if err := os.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
-		return fmt.Errorf( "write to %s: %w", dest, err)
+		return fmt.Errorf("write to %s: %w", dest, err)
 	}
 
 	return nil
@@ -257,11 +265,11 @@ func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 	path = filepath.FromSlash(path)
 
 	if err := os.MkdirAll(dir, 0777); err != nil {
-		return fmt.Errorf( "create directory %s: %w", dir, err)
+		return fmt.Errorf("create directory %s: %w", dir, err)
 	}
 
 	if err := os.WriteFile(path, data, perm); err != nil {
-		return fmt.Errorf( "write data to %s: %w", path, err)
+		return fmt.Errorf("write data to %s: %w", path, err)
 	}
 
 	return nil
@@ -279,4 +287,3 @@ func isAvailableSSH(identifyPath string) (bool, error) {
 	// TODO: validate ssh key
 	return true, nil
 }
-

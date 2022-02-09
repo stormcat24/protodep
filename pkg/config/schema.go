@@ -24,6 +24,7 @@ type ProtoDepDependency struct {
 	Branch   string   `toml:"branch"`
 	Path     string   `toml:"path"`
 	Ignores  []string `toml:"ignores"`
+	Includes []string `toml:"includes"`
 	Protocol string   `toml:"protocol"`
 }
 
