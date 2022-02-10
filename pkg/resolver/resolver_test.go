@@ -46,6 +46,7 @@ func TestSync(t *testing.T) {
 	httpsAuthProviderMock := auth.NewMockAuthProvider(c)
 	httpsAuthProviderMock.EXPECT().AuthMethod().Return(nil, nil).AnyTimes()
 	httpsAuthProviderMock.EXPECT().GetRepositoryURL("github.com/protocolbuffers/protobuf").Return("https://github.com/protocolbuffers/protobuf.git")
+	httpsAuthProviderMock.EXPECT().GetRepositoryURL("github.com/protodep/catalog").Return("https://github.com/protodep/catalog.git")
 
 	sshAuthProviderMock := auth.NewMockAuthProvider(c)
 	sshAuthProviderMock.EXPECT().AuthMethod().Return(nil, nil).AnyTimes()
@@ -85,6 +86,18 @@ func TestSync(t *testing.T) {
 	if isFileExist(filepath.Join(outputRootDir, "proto/google/protobuf/util/internal/testdata/")) {
 		t.Error("found file [proto/google/protobuf/util/internal/testdata/]")
 	}
+
+	// check include worked
+	// glob test 1
+	if !isFileExist(filepath.Join(outputRootDir, "proto/protodep/hierarchy/service.proto")) {
+		t.Error("not found file [proto/protodep/hierarchy/service.proto]")
+	}
+
+	// glob test 2
+	if !isFileExist(filepath.Join(outputRootDir, "proto/protodep/hierarchy/fuga/fuga.proto")) {
+		t.Error("not found file [proto/protodep/hierarchy/fuga/fuga.proto]")
+	}
+
 
 	// fetch
 	err = target.Resolve(false, false)
@@ -155,4 +168,3 @@ func TestIsAvailableSSH(t *testing.T) {
 	require.NoError(t, err)
 	require.False(t, notFound)
 }
-

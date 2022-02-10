@@ -150,6 +150,7 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 			Branch:   repo.Dep.Branch,
 			Revision: repo.Hash,
 			Path:     repo.Dep.Path,
+			Includes: repo.Dep.Includes,
 			Ignores:  repo.Dep.Ignores,
 			Protocol: repo.Dep.Protocol,
 			Subgroup: repo.Dep.Subgroup,
