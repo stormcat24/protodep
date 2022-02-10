@@ -64,11 +64,22 @@ proto_outdir = "./proto"
   revision = "v1.2.2"
   path = "grpc-gateway/examplepb"
 
+# blacklist by "ignores" attribute
 [[dependencies]]
   target = "github.com/kubernetes/helm/_proto/hapi"
   branch = "master"
   path = "helm/hapi"
   ignores = ["./release", "./rudder", "./services", "./version"]
+  
+# whitelist by "includes" attribute
+[[dependencies]]
+  target = "github.com/protodep/catalog/hierarchy"
+  branch = "main"
+  includes = [
+    "/protodep/hierarchy/service.proto",
+    "**/fuga/**",
+  ]
+  protocol = "https"
 ```
 
 ### protodep up
