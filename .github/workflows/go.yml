@@ -13,8 +13,8 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: set golang environment variables
@@ -22,7 +22,7 @@ jobs:
           echo "GOCACHE=$(go env GOCACHE)" >> $GITHUB_ENV
           echo "GOMODCACHE=$(go env GOMODCACHE)" >> $GITHUB_ENV
       - name: cache modules
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ${GOMODCACHE}
           key: ${{ runner.os }}-modules-${{ hashFiles('go.sum') }}
@@ -32,7 +32,7 @@ jobs:
       - name: download dependencies
         run: go mod download
       - name: cache vendor
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor
           key: ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
@@ -45,12 +45,12 @@ jobs:
     needs: setup 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: cache vendor
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor
           key: ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
@@ -63,12 +63,12 @@ jobs:
     needs: test 
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
         with:
           go-version: ${{ env.GO_VERSION }}
       - name: cache vendor
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: vendor
           key: ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
