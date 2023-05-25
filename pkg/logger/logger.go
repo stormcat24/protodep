@@ -2,6 +2,8 @@ package logger
 
 import (
 	"fmt"
+	"github.com/mattn/go-isatty"
+	"os"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -21,19 +23,32 @@ func Error(format string, a ...interface{}) {
 }
 
 type spinnerWrapper struct {
-	*spinner.Spinner
+	spinner *spinner.Spinner
+}
+
+func (s *spinnerWrapper) Stop() {
+	if s.spinner != nil {
+		s.spinner.Stop()
+	}
 }
 
 func (s *spinnerWrapper) Finish() {
-	s.Stop()
+	if s.spinner != nil {
+		s.spinner.Stop()
+	}
 	fmt.Print("\n")
 }
 
 func InfoWithSpinner(format string, a ...interface{}) *spinnerWrapper {
-	s := spinner.New(spinner.CharSets[38], 100*time.Millisecond) // Build our new spinner
 	txt := color.GreenString("[INFO] "+format, a...)
 	fmt.Print(txt)
-	s.Start()
+
+	var s *spinner.Spinner
+	if isatty.IsTerminal(os.Stdout.Fd()) {
+		fmt.Print("\n")
+		s = spinner.New(spinner.CharSets[38], 100*time.Millisecond) // Build our new spinner
+		s.Start()
+	}
 
 	return &spinnerWrapper{s}
 }
