@@ -59,8 +59,9 @@ jobs:
             ${{ runner.os }}-vendor-
       - run: make test
 
-  build:
-    needs: test 
+  release:
+    needs: test
+    if: contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -75,4 +76,4 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-vendor-${{ hashFiles('go.mod', 'go.sum') }}
             ${{ runner.os }}-vendor-
-      - run: make build
+      - run: make build-all
