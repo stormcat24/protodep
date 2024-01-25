@@ -23,10 +23,12 @@ _testmain.go
 *.test
 *.prof
 *.iml
+.envrc
 
 vendor/
 bin/
 .idea/
+.vscode/
 
 protodep.lock
 artifacts/

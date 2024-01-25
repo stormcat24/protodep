@@ -48,7 +48,6 @@ func New(conf *Config) (Resolver, error) {
 }
 
 func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
-
 	dep := config.NewDependency(s.conf.TargetDir, forceUpdate)
 	protodep, err := dep.Load()
 	if err != nil {
@@ -79,19 +78,57 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 		return err
 	}
 
-	for _, dep := range protodep.Dependencies {
-		var authProvider auth.AuthProvider
+	var netrcInfo []netrcLine
+	netrcInfo, err = readNetrc()
+	if !os.IsNotExist(err) {
+		logger.Warn("netrc file error: %v", err)
+	}
 
-		if s.conf.UseHttps {
-			authProvider = s.httpsProvider
+	for _, dep := range protodep.Dependencies {
+		var (
+			authProvider           auth.AuthProvider
+			userName, userPassword string
+		)
+
+		if dep.PasswordEnv != "" || dep.UsernameEnv != "" {
+			if dep.UsernameEnv == "" || dep.PasswordEnv == "" {
+				return fmt.Errorf("auth_username_env and auth_password_env must be set together")
+			}
+
+			userName = os.Getenv(dep.UsernameEnv)
+			userPassword = os.Getenv(dep.PasswordEnv)
+
+			if userName == "" {
+				return fmt.Errorf("auth_username_env %s is empty", dep.UsernameEnv)
+			}
+
+			if userPassword == "" {
+				return fmt.Errorf("auth_password_env %s is empty", dep.PasswordEnv)
+			}
 		} else {
-			switch dep.Protocol {
-			case "https":
+			machine := dep.Machine()
+
+			for _, netrc := range netrcInfo {
+				if netrc.machine == machine && netrc.login != "" && netrc.password != "" {
+					userName = netrc.login
+					userPassword = netrc.password
+					break
+				}
+			}
+		}
+
+		if s.conf.UseHttps || dep.Protocol == "https" || (dep.Protocol == "" && userName != "") {
+			if userName != "" {
+				authProvider = auth.NewAuthProvider(auth.WithHTTPS(userName, userPassword))
+			} else {
 				authProvider = s.httpsProvider
-			case "ssh", "":
+			}
+		} else {
+			if dep.Protocol == "ssh" {
+				if dep.UsernameEnv != "" {
+					return fmt.Errorf("auth_username_env and auth_password_env are not supported for ssh protocol")
+				}
 				authProvider = s.sshProvider
-			default:
-				return fmt.Errorf("%s protocol is not accepted (ssh or https only)", dep.Protocol)
 			}
 		}
 
@@ -140,7 +177,7 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 				return err
 			}
 
-			if err := writeFileWithDirectory(outpath, content, 0644); err != nil {
+			if err := writeFileWithDirectory(outpath, content, 0o644); err != nil {
 				return err
 			}
 		}
@@ -243,7 +280,7 @@ func writeToml(dest string, input interface{}) error {
 		return fmt.Errorf("encode config to toml format: %w", err)
 	}
 
-	if err := os.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(dest, buffer.Bytes(), 0o644); err != nil {
 		return fmt.Errorf("write to %s: %w", dest, err)
 	}
 
@@ -251,7 +288,6 @@ func writeToml(dest string, input interface{}) error {
 }
 
 func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
-
 	path = filepath.ToSlash(path)
 	s := strings.Split(path, "/")
 
@@ -265,7 +301,7 @@ func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 	dir = filepath.FromSlash(dir)
 	path = filepath.FromSlash(path)
 
-	if err := os.MkdirAll(dir, 0777); err != nil {
+	if err := os.MkdirAll(dir, 0o777); err != nil {
 		return fmt.Errorf("create directory %s: %w", dir, err)
 	}
 

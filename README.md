@@ -80,6 +80,17 @@ proto_outdir = "./proto"
     "**/fuga/**",
   ]
   protocol = "https"
+
+# gitlab subgroups
+# repository: gitlab.company.org/core/product/backend/service1
+# subgroup: backend/service
+[[dependencies]]
+  target = "gitlab.company.org/core/product/backend/service1/api/protos"
+  subgroup = "backend/service1"
+  revision = "v1.0.0"
+  path = "service1"
+  username_env = "GITLAB_USERNAME" # user environment variable for HTTP Basic Authentication
+  password_env = "GITLAB_PASSWORD" # token/password environment variable for HTTP Basic Authentication
 ```
 
 ### protodep up
@@ -128,6 +139,25 @@ $ protodep up --use-https \
     --basic-auth-username=your-github-username \
     --basic-auth-password=your-github-password
 ```
+
+You can also set the username and password as environment variables and set them in the protodep.toml file for each dependency.
+
+```toml
+[[dependencies]]
+  target = "github.com/your-org/your-repo"
+  branch = "master"
+  username_env = "GITHUB_USERNAME"
+  password_env = "GITHUB_PASSWORD"
+```
+
+Another way is to use the .netrc file in your home directory. Set the username and password in the .netrc as follows.
+
+```bash
+machine github.com
+login your-github-username
+password your-github-token
+```
+
 
 ### License
 
