@@ -80,7 +80,7 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 
 	var netrcInfo []netrcLine
 	netrcInfo, err = readNetrc()
-	if !os.IsNotExist(err) {
+	if err != nil && !os.IsNotExist(err) {
 		logger.Warn("netrc file error: %v", err)
 	}
 
@@ -97,7 +97,12 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 				return fmt.Errorf("subgroup, revision, branch, path, protocol and username_env cannot be set together with local_folder")
 			}
 
-			sources, err = s.getSources(dep, dep.LocalFolder)
+			localFolder, err := filepath.Abs(dep.LocalFolder)
+			if err != nil {
+				return fmt.Errorf("invalid local_folder: %w", err)
+			}
+
+			sources, err = s.getSources(dep, localFolder)
 			if err != nil {
 				return err
 			}
