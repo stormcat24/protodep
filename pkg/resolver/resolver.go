@@ -48,7 +48,6 @@ func New(conf *Config) (Resolver, error) {
 }
 
 func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
-
 	dep := config.NewDependency(s.conf.TargetDir, forceUpdate)
 	protodep, err := dep.Load()
 	if err != nil {
@@ -79,58 +78,49 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 		return err
 	}
 
+	var netrcInfo []netrcLine
+	netrcInfo, err = readNetrc()
+	if err != nil && !os.IsNotExist(err) {
+		logger.Warn("netrc file error: %v", err)
+	}
+
 	for _, dep := range protodep.Dependencies {
-		var authProvider auth.AuthProvider
+		var sources []protoResource
 
-		if s.conf.UseHttps {
-			authProvider = s.httpsProvider
-		} else {
-			switch dep.Protocol {
-			case "https":
-				authProvider = s.httpsProvider
-			case "ssh", "":
-				authProvider = s.sshProvider
-			default:
-				return fmt.Errorf("%s protocol is not accepted (ssh or https only)", dep.Protocol)
+		if dep.Target != "" && dep.LocalFolder != "" {
+			return fmt.Errorf("target and local_folder cannot be set together")
+		}
+
+		if dep.LocalFolder != "" {
+			if dep.Subgroup != "" || dep.Revision != "" || dep.Branch != "" ||
+				dep.Protocol != "" || dep.UsernameEnv != "" || dep.PasswordEnv != "" {
+				return fmt.Errorf("subgroup, revision, branch, path, protocol and username_env cannot be set together with local_folder")
 			}
-		}
 
-		gitrepo := repository.NewGit(protodepDir, dep, authProvider)
+			localFolder, err := filepath.Abs(dep.LocalFolder)
+			if err != nil {
+				return fmt.Errorf("invalid local_folder: %w", err)
+			}
 
-		repo, err := gitrepo.Open()
-		if err != nil {
-			return err
-		}
-
-		sources := make([]protoResource, 0)
-
-		compiledIgnores := compileIgnoreToGlob(dep.Ignores)
-		compiledIncludes := compileIgnoreToGlob(dep.Includes)
-
-		hasIncludes := len(dep.Includes) > 0
-
-		protoRootDir := gitrepo.ProtoRootDir()
-		filepath.Walk(protoRootDir, func(path string, info os.FileInfo, err error) error {
+			sources, err = s.getSources(dep, localFolder)
 			if err != nil {
 				return err
 			}
-			if strings.HasSuffix(path, ".proto") {
-				isIncludePath := s.isMatchPath(protoRootDir, path, dep.Includes, compiledIncludes)
-				isIgnorePath := s.isMatchPath(protoRootDir, path, dep.Ignores, compiledIgnores)
-
-				if hasIncludes && !isIncludePath {
-					logger.Info("skipped %s due to include setting", path)
-				} else if isIgnorePath {
-					logger.Info("skipped %s due to ignore setting", path)
-				} else {
-					sources = append(sources, protoResource{
-						source:       path,
-						relativeDest: strings.Replace(path, protoRootDir, "", -1),
-					})
-				}
+		} else if dep.Target != "" {
+			gitrepo, err := s.getRepository(dep, protodepDir, netrcInfo)
+			if err != nil {
+				return err
 			}
-			return nil
-		})
+			if _, err = gitrepo.Open(); err != nil {
+				return err
+			}
+			sources, err = s.getSources(dep, gitrepo.ProtoRootDir())
+			if err != nil {
+				return err
+			}
+		} else {
+			return fmt.Errorf("target or local_folder must be set")
+		}
 
 		for _, s := range sources {
 			outpath := filepath.Join(outdir, dep.Path, s.relativeDest)
@@ -140,21 +130,12 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 				return err
 			}
 
-			if err := writeFileWithDirectory(outpath, content, 0644); err != nil {
+			if err := writeFileWithDirectory(outpath, content, 0o644); err != nil {
 				return err
 			}
 		}
 
-		newdeps = append(newdeps, config.ProtoDepDependency{
-			Target:   repo.Dep.Target,
-			Branch:   repo.Dep.Branch,
-			Revision: repo.Hash,
-			Path:     repo.Dep.Path,
-			Includes: repo.Dep.Includes,
-			Ignores:  repo.Dep.Ignores,
-			Protocol: repo.Dep.Protocol,
-			Subgroup: repo.Dep.Subgroup,
-		})
+		newdeps = append(newdeps, dep)
 	}
 
 	newProtodep := config.ProtoDep{
@@ -169,6 +150,93 @@ func (s *resolver) Resolve(forceUpdate bool, cleanupCache bool) error {
 	}
 
 	return nil
+}
+
+func (s *resolver) getRepository(dep config.ProtoDepDependency, protodepDir string, netrcInfo []netrcLine) (repository.Git, error) {
+	var (
+		authProvider           auth.AuthProvider
+		userName, userPassword string
+	)
+
+	if dep.PasswordEnv != "" || dep.UsernameEnv != "" {
+		if dep.UsernameEnv == "" || dep.PasswordEnv == "" {
+			return nil, fmt.Errorf("auth_username_env and auth_password_env must be set together")
+		}
+
+		userName = os.Getenv(dep.UsernameEnv)
+		userPassword = os.Getenv(dep.PasswordEnv)
+
+		if userName == "" {
+			return nil, fmt.Errorf("auth_username_env %s is empty", dep.UsernameEnv)
+		}
+
+		if userPassword == "" {
+			return nil, fmt.Errorf("auth_password_env %s is empty", dep.PasswordEnv)
+		}
+	} else {
+		machine := dep.Machine()
+
+		for _, netrc := range netrcInfo {
+			if netrc.machine == machine && netrc.login != "" && netrc.password != "" {
+				userName = netrc.login
+				userPassword = netrc.password
+				break
+			}
+		}
+	}
+
+	if s.conf.UseHttps || dep.Protocol == "https" || (dep.Protocol == "" && userName != "") {
+		if userName != "" {
+			authProvider = auth.NewAuthProvider(auth.WithHTTPS(userName, userPassword))
+		} else {
+			authProvider = s.httpsProvider
+		}
+	} else {
+		if dep.Protocol == "ssh" {
+			if dep.UsernameEnv != "" {
+				return nil, fmt.Errorf("auth_username_env and auth_password_env are not supported for ssh protocol")
+			}
+			authProvider = s.sshProvider
+		}
+	}
+
+	return repository.NewGit(protodepDir, dep, authProvider), nil
+}
+
+func (s *resolver) getSources(dep config.ProtoDepDependency, protoRootDir string) ([]protoResource, error) {
+	sources := make([]protoResource, 0)
+
+	compiledIgnores := compileIgnoreToGlob(dep.Ignores)
+	compiledIncludes := compileIgnoreToGlob(dep.Includes)
+
+	hasIncludes := len(dep.Includes) > 0
+
+	err := filepath.Walk(protoRootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if strings.HasSuffix(path, ".proto") {
+			isIncludePath := s.isMatchPath(protoRootDir, path, dep.Includes, compiledIncludes)
+			isIgnorePath := s.isMatchPath(protoRootDir, path, dep.Ignores, compiledIgnores)
+
+			if hasIncludes && !isIncludePath {
+				logger.Info("skipped %s due to include setting", path)
+			} else if isIgnorePath {
+				logger.Info("skipped %s due to ignore setting", path)
+			} else {
+				sources = append(sources, protoResource{
+					source:       path,
+					relativeDest: strings.Replace(path, protoRootDir, "", -1),
+				})
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return sources, nil
 }
 
 func (s *resolver) SetHttpsAuthProvider(provider auth.AuthProvider) {
@@ -243,7 +311,7 @@ func writeToml(dest string, input interface{}) error {
 		return fmt.Errorf("encode config to toml format: %w", err)
 	}
 
-	if err := os.WriteFile(dest, buffer.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(dest, buffer.Bytes(), 0o644); err != nil {
 		return fmt.Errorf("write to %s: %w", dest, err)
 	}
 
@@ -251,7 +319,6 @@ func writeToml(dest string, input interface{}) error {
 }
 
 func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
-
 	path = filepath.ToSlash(path)
 	s := strings.Split(path, "/")
 
@@ -265,7 +332,7 @@ func writeFileWithDirectory(path string, data []byte, perm os.FileMode) error {
 	dir = filepath.FromSlash(dir)
 	path = filepath.FromSlash(path)
 
-	if err := os.MkdirAll(dir, 0777); err != nil {
+	if err := os.MkdirAll(dir, 0o777); err != nil {
 		return fmt.Errorf("create directory %s: %w", dir, err)
 	}
 

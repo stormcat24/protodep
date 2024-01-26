@@ -18,14 +18,17 @@ func (d *ProtoDep) Validate() error {
 }
 
 type ProtoDepDependency struct {
-	Target   string   `toml:"target"`
-	Subgroup string   `toml:"subgroup"`
-	Revision string   `toml:"revision"`
-	Branch   string   `toml:"branch"`
-	Path     string   `toml:"path"`
-	Ignores  []string `toml:"ignores"`
-	Includes []string `toml:"includes"`
-	Protocol string   `toml:"protocol"`
+	Target      string   `toml:"target"`
+	LocalFolder string   `toml:"local_folder"`
+	Subgroup    string   `toml:"subgroup"`
+	Revision    string   `toml:"revision"`
+	Branch      string   `toml:"branch"`
+	Path        string   `toml:"path"`
+	Ignores     []string `toml:"ignores"`
+	Includes    []string `toml:"includes"`
+	Protocol    string   `toml:"protocol"`
+	UsernameEnv string   `toml:"username_env"`
+	PasswordEnv string   `toml:"password_env"`
 }
 
 func (d *ProtoDepDependency) Repository() string {
@@ -50,4 +53,12 @@ func (d *ProtoDepDependency) Directory() string {
 	} else {
 		return "." + strings.Replace(d.Target, r, "", 1)
 	}
+}
+
+func (d *ProtoDepDependency) Machine() string {
+	tokens := strings.Split(d.Target, "/")
+	if len(tokens) < 1 {
+		return ""
+	}
+	return tokens[0]
 }
