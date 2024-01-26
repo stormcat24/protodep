@@ -3,7 +3,6 @@ protodep
 
 ![logo](./logo/web.png)
 
-
 ![GitHub Actions](https://github.com/stormcat24/protodep/actions/workflows/go.yml/badge.svg)
 [![Language](https://img.shields.io/badge/language-go-brightgreen.svg?style=flat)](https://golang.org/)
 [![issues](https://img.shields.io/github/issues/stormcat24/protodep.svg?style=flat)](https://github.com/stormcat24/protodep/issues?state=open)
@@ -13,20 +12,18 @@ protodep
 
 Dependency tool for Protocol Buffers IDL file (.proto) vendoring tool.
 
-
 ## Motivation
 
 In building Microservices architecture, gRPC with Protocol Buffers is effective. When using gRPC, your application will depend on many remote services.
 
 If you manage proto files in a git repository, what will you do? Most remote services are managed by git and they will be versioned. We need to control which dependency service version that application uses.
 
-
 ## Install
 
 ### go install
 
 ```bash
-$ go install -v github.com/stormcat24/protodep@v0.1.7
+go install -v github.com/stormcat24/protodep@v0.1.7
 ```
 
 ### from binary
@@ -41,9 +38,9 @@ Support as follows:
 * protodep_linux_arm64.tar.gz
 
 ```bash
-$ wget https://github.com/stormcat24/protodep/releases/download/0.1.4/protodep_darwin_amd64.tar.gz
-$ tar -xf protodep_darwin_amd64.tar.gz
-$ mv protodep /usr/local/bin/
+wget https://github.com/stormcat24/protodep/releases/download/0.1.4/protodep_darwin_amd64.tar.gz
+tar -xf protodep_darwin_amd64.tar.gz
+mv protodep /usr/local/bin/
 ```
 
 ## Usage
@@ -91,6 +88,11 @@ proto_outdir = "./proto"
   path = "service1"
   username_env = "GITLAB_USERNAME" # user environment variable for HTTP Basic Authentication
   password_env = "GITLAB_PASSWORD" # token/password environment variable for HTTP Basic Authentication
+
+# import from local folder
+[[dependencies]]
+local_folder = "./api/broker"
+path = "proto/broker"
 ```
 
 ### protodep up
@@ -98,7 +100,7 @@ proto_outdir = "./proto"
 In same directory, execute this command.
 
 ```bash
-$ protodep up
+protodep up
 ```
 
 If succeeded, `protodep.lock` is generated.
@@ -108,7 +110,7 @@ If succeeded, `protodep.lock` is generated.
 Even if protodep.lock exists, you can force update dependenies.
 
 ```bash
-$ protodep up -f
+protodep up -f
 ```
 
 ### [Attention] Changes from 0.1.0
@@ -119,8 +121,8 @@ In other words, in order to operate protodep without options as before, it is ne
 As the follows:
 
 ```bash
-$ ssh-add ~/.ssh/id_rsa
-$ protodep up
+ssh-add ~/.ssh/id_rsa
+protodep up
 ```
 
 ### Getting via HTTPS
@@ -128,11 +130,11 @@ $ protodep up
 If you want to get it via HTTPS, do as follows.
 
 ```bash
-$ protodep up --use-https
+protodep up --use-https
 ```
 
 And also, if Basic authentication is required, do as follows.
-If you have 2FA enabled, specify the Personal Access Token as the password. 
+If you have 2FA enabled, specify the Personal Access Token as the password.
 
 ```bash
 $ protodep up --use-https \
@@ -157,7 +159,6 @@ machine github.com
 login your-github-username
 password your-github-token
 ```
-
 
 ### License
 
