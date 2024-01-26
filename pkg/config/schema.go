@@ -19,6 +19,7 @@ func (d *ProtoDep) Validate() error {
 
 type ProtoDepDependency struct {
 	Target      string   `toml:"target"`
+	LocalFolder string   `toml:"local_folder"`
 	Subgroup    string   `toml:"subgroup"`
 	Revision    string   `toml:"revision"`
 	Branch      string   `toml:"branch"`
